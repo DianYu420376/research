@@ -363,15 +363,16 @@ footer .fname{color:var(--ink);font-weight:700;}
 .roadmap{margin-top:20px;border-top:1px solid var(--rule2);}
 .rmrow{display:grid;grid-template-columns:minmax(0,1fr) 26px minmax(0,1.25fr);gap:10px;
   align-items:baseline;padding:11px 0;border-bottom:1px solid var(--rule2);}
+/* Phones keep the challenge -> theme row horizontal. Stacking the row and
+   pointing the arrow downwards was clearer but cost 86px over three rows
+   (331px -> 245px at 375px wide), so it reads across instead, on smaller
+   type. Verified horizontal with no overflow from 340px up. */
 @media (max-width:700px){
-  .rmrow{grid-template-columns:minmax(0,1fr);gap:3px;padding:10px 0;}
-  /* the row stacks into one column here, so the arrow has to point down the
-     page rather than across it, or the challenge-to-theme link is invisible */
-  /* stays centred: the base .rma rule sits below this block and wins on
-     text-align. Centred reads better between two stacked lines anyway. */
-  .rma{display:block;line-height:1;margin:3px 0 5px;
-    font-size:0;}                          /* hide the -> glyph in the markup */
-  .rma::before{content:"\2193";font-size:1rem;}   /* point down the page */
+  .rmrow{grid-template-columns:minmax(0,1fr) 12px minmax(0,1.1fr);
+    gap:6px;padding:9px 0;align-items:start;}
+  .rmc{font-size:.83rem;line-height:1.35;}
+  .rmd{font-size:.87rem;line-height:1.3;}
+  .rma{font-size:.8rem;line-height:1.5;}
 }
 .rmc{font-size:.94rem;color:var(--ink2);}
 .rma{color:var(--ink3);text-align:center;}
