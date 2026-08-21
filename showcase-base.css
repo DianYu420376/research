@@ -365,7 +365,13 @@ footer .fname{color:var(--ink);font-weight:700;}
   align-items:baseline;padding:11px 0;border-bottom:1px solid var(--rule2);}
 @media (max-width:700px){
   .rmrow{grid-template-columns:minmax(0,1fr);gap:3px;padding:10px 0;}
-  .rma{display:none;}
+  /* the row stacks into one column here, so the arrow has to point down the
+     page rather than across it, or the challenge-to-theme link is invisible */
+  /* stays centred: the base .rma rule sits below this block and wins on
+     text-align. Centred reads better between two stacked lines anyway. */
+  .rma{display:block;line-height:1;margin:3px 0 5px;
+    font-size:0;}                          /* hide the -> glyph in the markup */
+  .rma::before{content:"\2193";font-size:1rem;}   /* point down the page */
 }
 .rmc{font-size:.94rem;color:var(--ink2);}
 .rma{color:var(--ink3);text-align:center;}
@@ -392,6 +398,10 @@ footer .fname{color:var(--ink);font-weight:700;}
 /* The wrapper used to hard-code a white panel and a hairline border, which no
    per-figure control could reach: turning a figure's border off in the editor
    left this frame behind. Both are tokens now, and both default to nothing. */
+.exsrc{font-family:var(--font-ui);font-size:.72rem;color:var(--ink3);margin:6px 0 0;letter-spacing:.01em;}
+.exsrc::before{content:"Source: ";color:var(--ink3);}
+.exsrc a{color:var(--ink3);text-decoration:none;border-bottom:1px solid var(--rule);}
+.exsrc a:hover{color:var(--accent);border-bottom-color:var(--accent);}
 .exfig{display:block;margin-bottom:10px;background:var(--exfig-bg,transparent);
   border:var(--exfig-border,0);border-radius:var(--r-sm);overflow:hidden;}
 .exfig img{display:block;width:100%;height:132px;object-fit:contain;

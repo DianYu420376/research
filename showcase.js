@@ -57,6 +57,7 @@ app.innerHTML = `
         ${e.img ? `<span class="exfig"><img src="${e.img}" alt="${e.name}"
              data-cap="${e.name}" data-fig="${e.img.split('/').pop()}"></span>` : ''}
         <span class="exn"${D(e.nameSrc)}>${e.name}</span><p${D(e.src)}>${e.text}</p>
+        ${e.source ? `<p class="exsrc"${D(e.sourceSrc)}>${e.source}</p>` : ''}
       </div>`).join('')}
   </div>
   <div class="mbody unites"><p${D(MOTIVATION.unitesSrc)}>${MOTIVATION.unites}</p></div>
