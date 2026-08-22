@@ -137,6 +137,7 @@ ${THEMES.map((th, ti) => `
 </div></section>`).join('')}
 
 <section id="future" class="band-future"><div class="sheet">
+  <div class="plate-head"><span class="plate-no">What&#8217;s next</span></div>
   <h2 class="fh"${D(FUTURE.headlineSrc)}>${FUTURE.headline}</h2>
   <p class="flead"${D(FUTURE.leadSrc)}>${FUTURE.lead}</p>
   <div class="fgrid${FUTURE.fig ? ' fgrid-stack' : ''}">
@@ -149,22 +150,18 @@ ${THEMES.map((th, ti) => `
       ${FUTURE.figCap ? `<figcaption${D(FUTURE.figCapSrc)}>${FUTURE.figCap}</figcaption>` : ''}
     </figure>
   </div>
-  ${(FUTURE.components && FUTURE.components.length) ? `<div class="comps">
+  ${(FUTURE.components && FUTURE.components.length) ? `
+  <div class="comps">
     ${FUTURE.components.map((c, i) => `
-      <article class="comp" data-comp="${i}">
-        <button class="comphead" aria-expanded="false">
-          <span class="compn">${String(i + 1).padStart(2, '0')}</span>
-          <span class="compt"${D(c.nameSrc)}>${c.name}</span>
-          <span class="compsum">${c.summary}</span>
-          <span class="compgo">more &#8595;</span>
-        </button>
-        <div class="compbody"><div class="compbody-in">
-          ${c.paras.map(t => `<p>${t}</p>`).join('')}
-          ${c.questions.length ? `<ul class="compq">${
-            c.questions.map(q => `<li>${q}</li>`).join('')}</ul>` : ''}
-        </div></div>
-      </article>`).join('')}
-  </div>` : ''}
+      <button class="comphead" data-comp="${i}" aria-expanded="false">
+        ${i ? '<span class="seam"><i></i></span>' : ''}
+        <span class="compn">${String(i + 1).padStart(2, '0')}</span>
+        <span class="compt"${D(c.nameSrc)}>${c.name}</span>
+        <span class="compsum">${c.summary}</span>
+        <span class="compgo">more &#8595;</span>
+      </button>`).join('')}
+  </div>
+  <div class="comppanel"><div class="comppanel-in"></div></div>` : ''}
   <p class="pull"${D(FUTURE.closingSrc)}>${FUTURE.closing}</p>
 </div></section>
 
@@ -203,7 +200,7 @@ addEventListener('resize', syncScrollOffset);
    figure has a light background and clashed with the dark band. ?future=
    light|tint|dark switches it so the options can be compared in place. */
 document.body.classList.add(
-  'future-' + (new URLSearchParams(location.search).get('future') || 'tint'));
+  'future-' + (new URLSearchParams(location.search).get('future') || 'light'));
 
 /* The page is built into #app after load, so by the time a URL like
    ...#future is processed the section does not exist yet and the browser
@@ -371,27 +368,58 @@ document.addEventListener('load', e => {
   }
 }, true);
 
-/* ---------- closing-section component boxes ---------- */
-document.querySelectorAll('.comp .comphead').forEach(h => {
+/* ---------- closing-section component boxes ----------
+   The three heads interlock in a row; the detail opens in one shared panel
+   underneath them. Expanding inside a one-third column gave a ~30-character
+   measure, which is not readable prose. */
+const compPanel = document.querySelector('.comppanel');
+const compPanelIn = compPanel && compPanel.querySelector('.comppanel-in');
+let compOpen = null;
+function renderComp(i) {
+  const c = FUTURE.components[i];
+  compPanelIn.innerHTML =
+    `<div class="compcols">
+       <div class="comptext">${c.paras.map(t => `<p>${t}</p>`).join('')}</div>
+       ${c.questions.length ? `<div class="compqs">
+         <span class="lab">Open questions</span>
+         <ul>${c.questions.map(q => `<li>${q}</li>`).join('')}</ul></div>` : ''}
+     </div>`;
+}
+function setCompHeight(open) {
+  compPanel.style.height = open ? compPanelIn.offsetHeight + 'px' : '0px';
+}
+document.querySelectorAll('.comphead').forEach(h => {
   h.addEventListener('click', () => {
-    const card = h.closest('.comp');
-    const body = card.querySelector('.compbody');
-    const open = card.classList.toggle('on');
-    h.setAttribute('aria-expanded', open ? 'true' : 'false');
-    h.querySelector('.compgo').innerHTML = open ? 'less &#8593;' : 'more &#8595;';
-    // height is animated, so it needs a number to move to and from
-    body.style.height = open
-      ? card.querySelector('.compbody-in').offsetHeight + 'px'
-      : '0px';
+    const i = +h.dataset.comp;
+    const heads = [...document.querySelectorAll('.comphead')];
+    if (compOpen === i) {                       // clicking the open one closes it
+      compOpen = null;
+      heads.forEach(x => { x.classList.remove('on'); x.setAttribute('aria-expanded', 'false');
+        x.querySelector('.compgo').innerHTML = 'more &#8595;'; });
+      compPanel.classList.remove('on');
+      setCompHeight(false);
+      return;
+    }
+    compOpen = i;
+    heads.forEach((x, k) => {
+      x.classList.toggle('on', k === i);
+      x.setAttribute('aria-expanded', k === i ? 'true' : 'false');
+      x.querySelector('.compgo').innerHTML = k === i ? 'less &#8593;' : 'more &#8595;';
+    });
+    renderComp(i);
+    compPanel.classList.add('on');
+    compPanel.style.height = 'auto';            // measure, then animate from it
+    const target = compPanelIn.offsetHeight;
+    compPanel.style.height = target + 'px';
   });
 });
-document.querySelectorAll('.compbody').forEach(b => {
-  b.addEventListener('transitionend', ev => {
-    if (ev.propertyName === 'height' && b.closest('.comp').classList.contains('on')) {
-      b.style.height = 'auto';           // never clip its own content
+if (compPanel) {
+  compPanel.addEventListener('transitionend', ev => {
+    if (ev.propertyName === 'height' && compPanel.classList.contains('on')) {
+      compPanel.style.height = 'auto';
     }
   });
-});
+}
 
 /* ---------- references ---------- */
 const seen = new Map();
