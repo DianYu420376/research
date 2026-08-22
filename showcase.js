@@ -158,7 +158,6 @@ ${THEMES.map((th, ti) => `
       : `<div class="isvg">${SVG_FUTURE}</div>`}
     ${FUTURE.figCap ? `<figcaption${D(FUTURE.figCapSrc)}>${FUTURE.figCap}</figcaption>` : ''}
   </figure>
-  <div class="fbody">${FUTURE.paras.map(p => `<p${D(p)}>${T(p)}</p>`).join('')}</div>
   ${(FUTURE.components && FUTURE.components.length) ? `
   <div class="comps">
     ${FUTURE.components.map((c, i) => `
@@ -171,6 +170,7 @@ ${THEMES.map((th, ti) => `
       </button>`).join('')}
   </div>
   <div class="comppanel"><div class="comppanel-in"></div></div>` : ''}
+  <div class="fbody">${FUTURE.paras.map(p => `<p${D(p)}>${T(p)}</p>`).join('')}</div>
   <p class="pull"${D(FUTURE.closingSrc)}>${FUTURE.closing}</p>
 </div></section>
 

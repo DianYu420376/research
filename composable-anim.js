@@ -25,6 +25,9 @@
   var ZK = 1.36;                                // how much larger the examined A is
   var ZW = S * ZK;
   var ZX = VW / 2 - ZW / 2, ZY = 250;           // A ends centred, above the boxes
+  // crop to just below the bottom knobs, so the boxes end up tight under the
+  // finished puzzle rather than across a gap
+  var CROP = GY + 2 * S + 0.12 * S + 12;
   var NS = 'http://www.w3.org/2000/svg';
 
   /* ---------- puzzle geometry ----------
@@ -328,12 +331,17 @@
     reveal(heads[0], T);                    // Incoming interface
     T += 520 + 360;
 
-    // 6. the team comes back to full strength; everything stays on screen.
-    //    The examined agent used to fade here and the stage crop so the boxes
-    //    could rise into the gap. The figure now sits directly under the lead
-    //    with the prose between it and the boxes, so nothing rises -- and the
-    //    last frame is what most readers actually look at. A and its two
-    //    labelled sides stay.
+    // 6. the examined agent has done its job: it fades, the stage crops to the
+    //    puzzle, and the three boxes rise into the space it leaves. The robot
+    //    and the name carry on inside the middle box.
+    A(ctx.callout, [{ opacity: 1 }, { opacity: 0 }],
+      { duration: 520, delay: T, fill: 'forwards' });
+    A(ctx.stage, [{ paddingBottom: (VH / VW * 100).toFixed(2) + '%' },
+                  { paddingBottom: (CROP / VW * 100).toFixed(2) + '%' }],
+      { duration: 760, delay: T + 160, fill: 'forwards' });
+    T += 760 + 200;
+
+    // 7. the team comes back to full strength; everything stays on screen.
     //    fill 'forwards', not 'both': with 'both' this step's first keyframe
     //    (0.4) was applied backwards from t=0, so the puzzle looked dimmed
     //    from the very first frame.

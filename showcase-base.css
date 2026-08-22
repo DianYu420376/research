@@ -219,9 +219,9 @@ h1.big{
   letter-spacing:var(--ls-display);margin:6px 0 18px;color:var(--band-hi);}
 .flead{font-family:var(--font-display);font-size:1.2rem;font-style:var(--fi-quote);
   color:var(--band-ink);max-width:44ch;margin:0 0 22px;}
-/* the figure now runs full width between the lead and the prose */
-.ffig{margin:18px 0 22px;}
-.fbody{margin-bottom:6px;}
+/* figure, then the boxes it hands off to, then the prose */
+.ffig{margin:18px 0 0;}
+.fbody{margin-top:30px;}
 .fbody p{font-size:1rem;color:var(--band-ink2);margin:0 0 14px;max-width:80ch;}
 /* the closing figure sits straight on the page rather than on a white card:
    the animation is transparent SVG, so the paper reads through it */
@@ -245,7 +245,8 @@ h1.big{
 /* ---------- the three interlocking component heads ----------
    They sit in one unbroken row and interlock at the seams, echoing the
    figure. The detail opens in a shared panel below, at full measure. */
-.comps{margin-top:34px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+/* tight to the figure: the animation hands off to these directly */
+.comps{margin-top:12px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
   --c1:#7c5cc4;--c2:#2f6fd0;--c3:#d97a12;}
 /* rounded panels with a coloured rule and title, as in the figure */
 .comphead{position:relative;display:block;text-align:left;font:inherit;color:inherit;
