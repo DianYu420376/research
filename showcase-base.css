@@ -219,8 +219,9 @@ h1.big{
   letter-spacing:var(--ls-display);margin:6px 0 18px;color:var(--band-hi);}
 .flead{font-family:var(--font-display);font-size:1.2rem;font-style:var(--fi-quote);
   color:var(--band-ink);max-width:44ch;margin:0 0 22px;}
-.fgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;align-items:start;}
-@media (max-width:940px){.fgrid{grid-template-columns:minmax(0,1fr);gap:26px;}}
+/* the figure now runs full width between the lead and the prose */
+.ffig{margin:18px 0 22px;}
+.fbody{margin-bottom:6px;}
 .fbody p{font-size:1rem;color:var(--band-ink2);margin:0 0 14px;max-width:80ch;}
 /* the closing figure sits straight on the page rather than on a white card:
    the animation is transparent SVG, so the paper reads through it */
@@ -347,7 +348,6 @@ h1.big{
 /* The supplied closing figure is a dense two-tier diagram; at half the band
    width its labels are unreadable, so the prose stacks above it and the
    figure takes the full measure. The dark band also needs a light ground. */
-.fgrid-stack{grid-template-columns:minmax(0,1fr);gap:26px;}
 .ffig img{width:100%;height:auto;display:block;background:#fff;border-radius:2px;
   cursor:zoom-in;}
 /* display:block above outranks the hidden attribute, so the fallback PNG

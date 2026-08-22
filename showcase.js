@@ -151,16 +151,14 @@ ${THEMES.map((th, ti) => `
   <div class="plate-head"><span class="plate-no">What&#8217;s next</span></div>
   <h2 class="fh"${D(FUTURE.headlineSrc)}>${FUTURE.headline}</h2>
   <p class="flead"${D(FUTURE.leadSrc)}>${FUTURE.lead}</p>
-  <div class="fgrid${FUTURE.fig ? ' fgrid-stack' : ''}">
-    <div class="fbody">${FUTURE.paras.map(p => `<p${D(p)}>${T(p)}</p>`).join('')}</div>
-    <figure class="ffig">
-      ${FUTURE.fig
-        ? `<img src="${FUTURE.fig}" alt="" data-cap="Composable coordination"
-               data-fig="${FUTURE.fig.split('/').pop()}">`
-        : `<div class="isvg">${SVG_FUTURE}</div>`}
-      ${FUTURE.figCap ? `<figcaption${D(FUTURE.figCapSrc)}>${FUTURE.figCap}</figcaption>` : ''}
-    </figure>
-  </div>
+  <figure class="ffig">
+    ${FUTURE.fig
+      ? `<img src="${FUTURE.fig}" alt="" data-cap="Composable coordination"
+             data-fig="${FUTURE.fig.split('/').pop()}">`
+      : `<div class="isvg">${SVG_FUTURE}</div>`}
+    ${FUTURE.figCap ? `<figcaption${D(FUTURE.figCapSrc)}>${FUTURE.figCap}</figcaption>` : ''}
+  </figure>
+  <div class="fbody">${FUTURE.paras.map(p => `<p${D(p)}>${T(p)}</p>`).join('')}</div>
   ${(FUTURE.components && FUTURE.components.length) ? `
   <div class="comps">
     ${FUTURE.components.map((c, i) => `
