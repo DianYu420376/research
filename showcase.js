@@ -149,24 +149,21 @@ ${THEMES.map((th, ti) => `
       ${FUTURE.figCap ? `<figcaption${D(FUTURE.figCapSrc)}>${FUTURE.figCap}</figcaption>` : ''}
     </figure>
   </div>
-  <div class="bets${FUTURE.bets.length === 4 ? ' bets-2col' : ''}">
-    ${FUTURE.bets.map((b, i) => `
-      <div class="bet">
-        <div class="bn">${String(i + 1).padStart(2, '0')}</div>
-        <h3${D(b.nameSrc)}>${b.name}</h3>
-        <p${D(b.src)}>${b.text}</p>
-      </div>`).join('')}
-  </div>
-  ${(FUTURE.apps && FUTURE.apps.length) ? `<div class="fground">
-    <span class="lab">Where it has to hold up</span>
-    <p class="fglead"${D(FUTURE.groundLeadSrc)}>${FUTURE.groundLead}</p>
-    <div class="fgcols">
-      ${FUTURE.apps.map((a, i) => `
-        <div class="fgcell">
-          <span class="fgn" style="color:var(--band-t${(i % 3) + 1})"${D(a.nameSrc)}>${a.name}</span>
-          <p${D(a.src)}>${a.text}</p>
-        </div>`).join('')}
-    </div>
+  ${(FUTURE.components && FUTURE.components.length) ? `<div class="comps">
+    ${FUTURE.components.map((c, i) => `
+      <article class="comp" data-comp="${i}">
+        <button class="comphead" aria-expanded="false">
+          <span class="compn">${String(i + 1).padStart(2, '0')}</span>
+          <span class="compt"${D(c.nameSrc)}>${c.name}</span>
+          <span class="compsum">${c.summary}</span>
+          <span class="compgo">more &#8595;</span>
+        </button>
+        <div class="compbody"><div class="compbody-in">
+          ${c.paras.map(t => `<p>${t}</p>`).join('')}
+          ${c.questions.length ? `<ul class="compq">${
+            c.questions.map(q => `<li>${q}</li>`).join('')}</ul>` : ''}
+        </div></div>
+      </article>`).join('')}
   </div>` : ''}
   <p class="pull"${D(FUTURE.closingSrc)}>${FUTURE.closing}</p>
 </div></section>
@@ -201,6 +198,12 @@ function scrollOffset() {
 }
 syncScrollOffset();
 addEventListener('resize', syncScrollOffset);
+
+/* The closing section's ground is a choice, not a constant: the supplied
+   figure has a light background and clashed with the dark band. ?future=
+   light|tint|dark switches it so the options can be compared in place. */
+document.body.classList.add(
+  'future-' + (new URLSearchParams(location.search).get('future') || 'tint'));
 
 /* The page is built into #app after load, so by the time a URL like
    ...#future is processed the section does not exist yet and the browser
@@ -367,6 +370,28 @@ document.addEventListener('load', e => {
     if (c && c.querySelector('.cbody').style.height !== 'auto') measure(c);
   }
 }, true);
+
+/* ---------- closing-section component boxes ---------- */
+document.querySelectorAll('.comp .comphead').forEach(h => {
+  h.addEventListener('click', () => {
+    const card = h.closest('.comp');
+    const body = card.querySelector('.compbody');
+    const open = card.classList.toggle('on');
+    h.setAttribute('aria-expanded', open ? 'true' : 'false');
+    h.querySelector('.compgo').innerHTML = open ? 'less &#8593;' : 'more &#8595;';
+    // height is animated, so it needs a number to move to and from
+    body.style.height = open
+      ? card.querySelector('.compbody-in').offsetHeight + 'px'
+      : '0px';
+  });
+});
+document.querySelectorAll('.compbody').forEach(b => {
+  b.addEventListener('transitionend', ev => {
+    if (ev.propertyName === 'height' && b.closest('.comp').classList.contains('on')) {
+      b.style.height = 'auto';           // never clip its own content
+    }
+  });
+});
 
 /* ---------- references ---------- */
 const seen = new Map();

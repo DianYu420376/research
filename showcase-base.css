@@ -223,6 +223,43 @@ h1.big{
 .ffig{border:1px solid var(--band-rule);background:var(--band-fig-bg);padding:12px;}
 .ffig figcaption{font-size:.82rem;color:var(--band-ink3);margin-top:9px;line-height:1.5;}
 .bets{margin-top:40px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;}
+/* ---------- closing section: three grounds to choose between ----------
+   The supplied figure has a light background, which fought the dark band.
+   ?future=light|tint|dark picks one; 'tint' is the default. Only the band
+   variables change, so every rule below is written once. */
+.future-light #future{--band-bg:var(--paper);--band-ink:var(--ink);
+  --band-ink2:var(--ink2);--band-ink3:var(--ink3);--band-hi:var(--ink);
+  --band-rule:var(--rule2);--band-fig-bg:var(--fig-bg);}
+.future-tint #future{--band-bg:#ece7db;--band-ink:var(--ink);
+  --band-ink2:var(--ink2);--band-ink3:var(--ink3);--band-hi:var(--ink);
+  --band-rule:#d5cdba;--band-fig-bg:#ffffff;}
+/* 'dark' keeps the original band values and instead mats the figure */
+.future-dark #future .ffig{padding:22px;border-radius:4px;background:#fff;
+  border-color:transparent;}
+.future-dark #future .ffig figcaption{color:var(--ink3);}
+
+/* ---------- the three juxtaposed component boxes ---------- */
+.comps{margin-top:38px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:18px;align-items:start;}
+@media (max-width:940px){.comps{grid-template-columns:minmax(0,1fr);}}
+.comp{border:1px solid var(--band-rule);background:rgba(127,127,127,.05);}
+.comp.on{border-color:var(--band-hi);}
+.comphead{display:block;width:100%;text-align:left;background:none;border:0;
+  padding:15px 16px;cursor:pointer;font:inherit;color:inherit;}
+.compn{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;
+  color:var(--band-ink3);display:block;}
+.compt{font-family:var(--font-display);font-size:1.06rem;color:var(--band-ink);
+  display:block;margin:3px 0 6px;line-height:1.25;}
+.compsum{font-size:.9rem;color:var(--band-ink2);display:block;line-height:1.5;}
+.compgo{font-family:var(--font-ui);font-size:.72rem;letter-spacing:.06em;
+  color:var(--band-ink3);display:block;margin-top:9px;}
+.comp:hover .compgo{color:var(--band-hi);}
+.compbody{height:0;overflow:hidden;transition:height .3s ease;}
+.compbody-in{padding:0 16px 15px;}
+.compbody p{font-size:.9rem;color:var(--band-ink2);margin:0 0 10px;line-height:1.55;}
+.compq{margin:10px 0 0;padding-left:16px;}
+.compq li{font-size:.86rem;color:var(--band-ink3);margin:0 0 6px;line-height:1.5;}
+
 /* four bets in a three-column grid leave an orphan; pair them instead */
 .bets-2col{grid-template-columns:repeat(2,minmax(0,1fr));}
 @media (max-width:940px){.bets,.bets-2col{grid-template-columns:minmax(0,1fr);}}
