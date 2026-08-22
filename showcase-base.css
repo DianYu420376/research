@@ -291,6 +291,10 @@ h1.big{
 .compqs li{font-size:.9rem;color:var(--ink2);margin:0 0 8px;line-height:1.5;
   break-inside:avoid;}
 
+/* editor only: the three component details stacked, each labelled */
+.edcomp + .edcomp{margin-top:20px;padding-top:18px;border-top:1px solid var(--rule2);}
+.edcomplab{display:block;margin-bottom:8px;color:var(--accent);}
+
 /* four bets in a three-column grid leave an orphan; pair them instead */
 .bets-2col{grid-template-columns:repeat(2,minmax(0,1fr));}
 @media (max-width:940px){.bets,.bets-2col{grid-template-columns:minmax(0,1fr);}}

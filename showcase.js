@@ -157,7 +157,7 @@ ${THEMES.map((th, ti) => `
         ${i ? '<span class="seam"><i></i></span>' : ''}
         <span class="compn">${String(i + 1).padStart(2, '0')}</span>
         <span class="compt"${D(c.nameSrc)}>${c.name}</span>
-        <span class="compsum">${c.summary}</span>
+        <span class="compsum"${D(c.summarySrc)}>${c.summary}</span>
         <span class="compgo">more &#8595;</span>
       </button>`).join('')}
   </div>
@@ -379,10 +379,10 @@ function renderComp(i) {
   const c = FUTURE.components[i];
   compPanelIn.innerHTML =
     `<div class="compcols">
-       <div class="comptext">${c.paras.map(t => `<p>${t}</p>`).join('')}</div>
+       <div class="comptext">${c.paras.map(p => `<p${D(p)}>${T(p)}</p>`).join('')}</div>
        ${c.questions.length ? `<div class="compqs">
          <span class="lab">Open questions</span>
-         <ul>${c.questions.map(q => `<li>${q}</li>`).join('')}</ul></div>` : ''}
+         <ul>${c.questions.map(q => `<li${D(q)}>${T(q)}</li>`).join('')}</ul></div>` : ''}
      </div>`;
 }
 function setCompHeight(open) {
