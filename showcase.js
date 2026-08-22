@@ -42,6 +42,17 @@ function figsHTML(figs) {
   return out;
 }
 
+/* The middle component is agent A's own: it carries the same robot mark the
+   closing animation hands over, so the piece and the box read as one thing. */
+const ROBOT_MARK = '<span class="compbot" aria-hidden="true">' +
+  '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" ' +
+  'stroke="currentColor" stroke-width="1.9" stroke-linecap="round">' +
+  '<path d="M12 3v2.4"/><circle cx="12" cy="2.2" r="1.2" fill="currentColor" ' +
+  'stroke="none"/><rect x="4.2" y="5.6" width="15.6" height="12.4" rx="3.4"/>' +
+  '<circle cx="9.2" cy="11.2" r="1.25" fill="currentColor" stroke="none"/>' +
+  '<circle cx="14.8" cy="11.2" r="1.25" fill="currentColor" stroke="none"/>' +
+  '<path d="M9.4 14.4q2.6 2 5.2 0"/></svg></span>';
+
 /* ---------- page skeleton ---------- */
 app.innerHTML = `
 <section id="thesis" class="sec-thesis"><div class="sheet">
@@ -155,7 +166,7 @@ ${THEMES.map((th, ti) => `
     ${FUTURE.components.map((c, i) => `
       <button class="comphead" data-comp="${i}" aria-expanded="false">
         ${i ? '<span class="seam"><i></i></span>' : ''}
-        <span class="compt"${D(c.nameSrc)}>${c.name}</span>
+        <span class="compt"${D(c.nameSrc)}>${i === 1 ? ROBOT_MARK : ''}${c.name}</span>
         <span class="compsum"${D(c.summarySrc)}>${c.summary}</span>
         <span class="compgo">more &#8595;</span>
       </button>`).join('')}

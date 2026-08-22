@@ -16,7 +16,7 @@
 
   var C = {                       // sampled from the figure itself
     blue: '#67a0f3', green: '#9cbf50', purple: '#ad7ad1',
-    orange: '#fdab33', coral: '#fc8e96', ink: '#383c5d'
+    orange: '#fdab33', coral: '#fc8e96', ink: '#1b2a63'
   };
   var HL = { out: '#d97a12', in: '#7c5cc4' };   // match the two interface boxes
   var S = 112;                                  // puzzle piece size
@@ -25,18 +25,23 @@
   var ZK = 1.36;                                // how much larger the examined A is
   var ZW = S * ZK;
   var ZX = VW / 2 - ZW / 2, ZY = 250;           // A ends centred, above the boxes
+  // crop to just below the bottom knobs: the boxes should sit right under
+  // the puzzle at the end, not across a gap
+  var CROP = GY + 2 * S + 0.12 * S + 12;
   var NS = 'http://www.w3.org/2000/svg';
 
   /* ---------- puzzle geometry ----------
      Each side runs 38% flat, a semicircular knob over the middle 24%, then 38%
      flat. tab = +1 pushes the knob outward, -1 cuts it inward, 0 is straight.
-     Walking the sides in order, an outward knob always veers left, which is
-     sweep 0 in SVG's y-down coordinates. */
+     Sweep 1 is the outward knob: measured, not reasoned about. This was
+     inverted for a long time and the grid still interlocked, because flipping
+     both sides of every seam keeps them complementary -- so only the labelled
+     callout, where a bump has to mean 'sends', ever revealed it. */
   function side(len, dx, dy, tab) {
     if (!tab) return 'l ' + dx * len + ' ' + dy * len;
     var a = 0.38 * len, k = 0.24 * len, r = 0.12 * len;
     return 'l ' + dx * a + ' ' + dy * a + ' ' +
-           'a ' + r + ' ' + r + ' 0 0 ' + (tab > 0 ? 0 : 1) + ' ' +
+           'a ' + r + ' ' + r + ' 0 0 ' + (tab > 0 ? 1 : 0) + ' ' +
            dx * k + ' ' + dy * k + ' ' + 'l ' + dx * a + ' ' + dy * a;
   }
   function piecePath(s, e) {          // e = [top, right, bottom, left]
@@ -49,20 +54,67 @@
     if (parent) parent.appendChild(n);
     return n;
   }
+  /* One piece, drawn the way the reference figure draws them: soft shadow,
+     flat colour, the embossed jigsaw texture, a top-light gradient, and a
+     heavy navy outline with round joins. */
+  function face(g, d, fill, plain) {
+    el('path', { d: d, fill: fill, stroke: fill, 'stroke-width': 7,
+      'stroke-linejoin': 'round', 'paint-order': 'stroke',
+      filter: 'url(#canimShadow)' }, g);
+    if (!plain) {
+      el('path', { d: d, fill: 'url(#canimTex)', stroke: 'none' }, g);
+    }
+    el('path', { d: d, fill: 'url(#canimSheen)', stroke: 'none' }, g);
+    el('path', { d: d, fill: 'none', stroke: C.ink, 'stroke-width': 3.1,
+      'stroke-linejoin': 'round' }, g);
+  }
+
+  /* The figure's robot: white rounded head with a heavy navy outline, side
+     ears, big round eyes, a smile and a mouth plate, on a ball-topped antenna. */
   function robot(g, cx, cy, sc) {
     sc = sc || 1;
-    var w = 34 * sc, h = 28 * sc;
-    el('line', { x1: cx, y1: cy - h / 2 - 8 * sc, x2: cx, y2: cy - h / 2,
-      stroke: C.ink, 'stroke-width': 2 * sc, 'stroke-linecap': 'round' }, g);
-    el('circle', { cx: cx, cy: cy - h / 2 - 10 * sc, r: 2.8 * sc, fill: C.ink }, g);
-    el('rect', { x: cx - w / 2, y: cy - h / 2, width: w, height: h, rx: 7 * sc,
-      fill: '#fff', stroke: C.ink, 'stroke-width': 2 * sc }, g);
-    el('circle', { cx: cx - 6.5 * sc, cy: cy - 2 * sc, r: 2.6 * sc, fill: C.ink }, g);
-    el('circle', { cx: cx + 6.5 * sc, cy: cy - 2 * sc, r: 2.6 * sc, fill: C.ink }, g);
-    el('path', { d: 'M ' + (cx - 6 * sc) + ' ' + (cy + 6 * sc) +
-      ' q ' + (6 * sc) + ' ' + (5 * sc) + ' ' + (12 * sc) + ' 0',
-      fill: 'none', stroke: C.ink, 'stroke-width': 1.9 * sc,
+    var w = 42 * sc, h = 34 * sc, ink = C.ink, lw = 2.6 * sc;
+    var top = cy - h / 2;
+    // antenna
+    el('line', { x1: cx, y1: top - 9 * sc, x2: cx, y2: top, stroke: ink,
+      'stroke-width': lw, 'stroke-linecap': 'round' }, g);
+    el('circle', { cx: cx, cy: top - 12 * sc, r: 3.4 * sc, fill: '#fff',
+      stroke: ink, 'stroke-width': lw }, g);
+    // ears
+    [-1, 1].forEach(function (sgn) {
+      el('rect', { x: cx + sgn * (w / 2 + 1.4 * sc) - (sgn > 0 ? 0 : 5 * sc),
+        y: cy - 5 * sc, width: 5 * sc, height: 12 * sc, rx: 2.4 * sc,
+        fill: '#fff', stroke: ink, 'stroke-width': lw }, g);
+    });
+    // head
+    el('rect', { x: cx - w / 2, y: top, width: w, height: h, rx: 9 * sc,
+      fill: '#fff', stroke: ink, 'stroke-width': lw }, g);
+    // eyes
+    el('circle', { cx: cx - 8.5 * sc, cy: cy - 3 * sc, r: 3.3 * sc, fill: ink }, g);
+    el('circle', { cx: cx + 8.5 * sc, cy: cy - 3 * sc, r: 3.3 * sc, fill: ink }, g);
+    // smile
+    el('path', { d: 'M ' + (cx - 7 * sc) + ' ' + (cy + 5 * sc) +
+      ' q ' + (7 * sc) + ' ' + (6 * sc) + ' ' + (14 * sc) + ' 0',
+      fill: 'none', stroke: ink, 'stroke-width': lw * .92,
       'stroke-linecap': 'round' }, g);
+    // mouth plate
+    el('rect', { x: cx - 7 * sc, y: top + h - 4.5 * sc, width: 14 * sc,
+      height: 6 * sc, rx: 1.8 * sc, fill: '#fff', stroke: ink,
+      'stroke-width': lw * .85 }, g);
+  }
+
+  /* three figures shoulder to shoulder: the team mark */
+  function group(g, cx, cy, ink) {
+    var head = function (x, y, r) {
+      el('circle', { cx: x, cy: y, r: r, fill: ink }, g);
+    };
+    var body = function (x, y, w, h) {
+      el('path', { d: 'M ' + (x - w / 2) + ' ' + (y + h) +
+        ' a ' + (w / 2) + ' ' + h + ' 0 0 1 ' + w + ' 0 Z', fill: ink }, g);
+    };
+    head(cx - 11, cy - 2, 4.1);  body(cx - 11, cy + 3, 13, 7.5);
+    head(cx + 11, cy - 2, 4.1);  body(cx + 11, cy + 3, 13, 7.5);
+    head(cx, cy - 5, 5.2);       body(cx, cy + 1.5, 16, 9);
   }
 
   /* the six grid slots; every shared seam is one tab against one blank */
@@ -85,27 +137,55 @@
 
   function build(host) {
     var svg = el('svg', { viewBox: '0 0 ' + VW + ' ' + VH, class: 'canim-svg',
+      // 'slice', not 'meet': when the stage crops at the end, meet would
+      // rescale the whole scene to fit the shorter box and the puzzle would
+      // shrink. slice keeps the width and clips the vacated bottom.
+      preserveAspectRatio: 'xMidYMin slice',
       role: 'img', 'aria-label':
         'Five independently trained agents assemble into a coordinated team. ' +
         'One agent is examined: its outward tab is what it sends, its inward ' +
         'notch is what it receives.' });
 
+    /* soft shadow and a top-lit gradient per colour: flat fills read cheap
+       next to the reference figure */
+    var defs = el('defs', {}, svg);
+    var sh = el('filter', { id: 'canimShadow', x: '-35%', y: '-35%',
+      width: '175%', height: '185%' }, defs);
+    el('feDropShadow', { dx: 1.5, dy: 4.5, stdDeviation: 3.8,
+      'flood-color': '#16224a', 'flood-opacity': 0.34 }, sh);
+
+    /* The figure's pieces are not flat: a faint jigsaw grid is embossed across
+       each one. A pattern of small piece outlines reproduces it, light on the
+       top edge and dark on the bottom so it reads as relief. */
+    var TL = 21;      // finer than the piece: an emboss, not a grid
+    var pat = el('pattern', { id: 'canimTex', width: TL, height: TL,
+      patternUnits: 'userSpaceOnUse' }, defs);
+    var mini = piecePath(TL, [1, -1, -1, 1]);
+    el('path', { d: mini, fill: 'none', stroke: '#fff', 'stroke-opacity': .22,
+      'stroke-width': 1.15, transform: 'translate(0,-0.75)' }, pat);
+    el('path', { d: mini, fill: 'none', stroke: '#0b1230', 'stroke-opacity': .075,
+      'stroke-width': 1 }, pat);
+
+    var sheen = el('linearGradient', { id: 'canimSheen', x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
+    el('stop', { offset: 0, 'stop-color': '#fff', 'stop-opacity': .30 }, sheen);
+    el('stop', { offset: .5, 'stop-color': '#fff', 'stop-opacity': .04 }, sheen);
+    el('stop', { offset: 1, 'stop-color': '#000', 'stop-opacity': .10 }, sheen);
+
     var team = el('g', { class: 'canim-team', opacity: '0' }, svg);
-    el('path', { d: piecePath(S, TEAM.e), fill: '#fff', stroke: '#d8d3cd',
-      'stroke-width': 1.8,
-      transform: 'translate(' + (GX + TEAM.col * S) + ',' + (GY + TEAM.row * S) + ')'
-    }, team);
+    var teamT = 'translate(' + (GX + TEAM.col * S) + ',' + (GY + TEAM.row * S) + ')';
+    var teamInner = el('g', { transform: teamT }, team);
+    face(teamInner, piecePath(S, TEAM.e), '#ffffff', true);
     var tcx = GX + TEAM.col * S + S / 2, tcy = GY + TEAM.row * S + S / 2;
-    el('text', { x: tcx, y: tcy + 1, 'text-anchor': 'middle',
+    group(team, tcx, tcy - 16, C.ink);
+    el('text', { x: tcx, y: tcy + 15, 'text-anchor': 'middle',
       class: 'canim-teamtext', fill: C.ink }, team).textContent = 'Coordinated';
-    el('text', { x: tcx, y: tcy + 17, 'text-anchor': 'middle',
+    el('text', { x: tcx, y: tcy + 29, 'text-anchor': 'middle',
       class: 'canim-teamtext', fill: C.ink }, team).textContent = 'Team';
 
     var pieces = SLOTS.map(function (s) {
       var g = el('g', { class: 'canim-piece' }, svg);
-      el('path', { d: piecePath(S, s.e), fill: s.c, stroke: 'rgba(0,0,0,.13)',
-        'stroke-width': 1.4 }, g);
-      robot(g, S / 2, S / 2 - 3, 0.82);
+      face(g, piecePath(S, s.e), s.c);
+      robot(g, S / 2, S / 2 - 5, 0.86);
       el('text', { x: S / 2, y: S / 2 + 34, 'text-anchor': 'middle',
         class: 'canim-letter', fill: C.ink }, g).textContent = s.t;
       return g;
@@ -121,8 +201,7 @@
          (ZX + ZW / 2) + ' ' + (ZY - 6) }, callout);
 
     var clone = el('g', { class: 'canim-clone' }, callout);
-    el('path', { d: piecePath(S, A_EDGES), fill: C.blue,
-      stroke: 'rgba(0,0,0,.13)', 'stroke-width': 1.4 }, clone);
+    face(clone, piecePath(S, A_EDGES), C.blue);
     robot(clone, S / 2, S / 2 - 3, 0.82);
     el('text', { x: S / 2, y: S / 2 + 34, 'text-anchor': 'middle',
       class: 'canim-letter', fill: C.ink }, clone).textContent = 'A';
@@ -252,7 +331,17 @@
     reveal(heads[0], T);                    // Incoming interface
     T += 520 + 360;
 
-    // 6. the team comes back to full strength; everything stays on screen.
+    // 6. the examined agent has done its job: it fades, the stage crops to the
+    //    puzzle, and the three boxes rise into the space it leaves. The robot
+    //    and the name live on inside the middle box from here.
+    A(ctx.callout, [{ opacity: 1 }, { opacity: 0 }],
+      { duration: 520, delay: T, fill: 'forwards' });
+    A(ctx.stage, [{ paddingBottom: (VH / VW * 100).toFixed(2) + '%' },
+                  { paddingBottom: (CROP / VW * 100).toFixed(2) + '%' }],
+      { duration: 760, delay: T + 160, fill: 'forwards' });
+    T += 760 + 200;
+
+    // 7. the team comes back to full strength; everything stays on screen.
     //    fill 'forwards', not 'both': with 'both' this step's first keyframe
     //    (0.4) was applied backwards from t=0, so the puzzle looked dimmed
     //    from the very first frame.
@@ -286,8 +375,10 @@
     wrap.className = 'canim';
     var stage = document.createElement('div');
     stage.className = 'canim-stage';
+    stage.style.paddingBottom = (VH / VW * 100).toFixed(2) + '%';
     wrap.appendChild(stage);
     var ctx = build(stage);
+    ctx.stage = stage;
 
     var replay = document.createElement('button');
     replay.className = 'canim-replay';
@@ -308,6 +399,7 @@
       live.forEach(function (a) { a.cancel(); });
       live = [];
       ctx.callout.style.opacity = 0;
+      ctx.stage.style.paddingBottom = (VH / VW * 100).toFixed(2) + '%';
       if (comps && heads.length === 3) comps.classList.add('canim-pending');
     }
     function play() {
