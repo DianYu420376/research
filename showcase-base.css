@@ -339,7 +339,6 @@ h1.big{
 .canim-scene{transform-origin:0 0;}
 .canim-letter{font-family:var(--font-ui);font-weight:700;font-size:21px;}
 .canim-teamtext{font-family:var(--font-ui);font-weight:700;font-size:13px;}
-.canim-agentlab{font-family:var(--font-ui);font-weight:700;font-size:20px;}
 .canim-hl{font-family:var(--font-ui);font-weight:700;font-size:15px;
   letter-spacing:.02em;}
 /* the robot and name in flight from the examined piece to the box header */

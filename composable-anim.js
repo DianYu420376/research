@@ -222,15 +222,12 @@
       'text-anchor': 'end', class: 'canim-hl', fill: HL.in, opacity: '0' }, callout);
     notchLabel.textContent = 'what it receives';
 
-    var agentLab = el('text', { x: ZX + ZW / 2, y: ZY + ZW + 28,
-      'text-anchor': 'middle', class: 'canim-agentlab', fill: C.ink,
-      opacity: '0' }, callout);
-    agentLab.textContent = 'Agent A';
+
 
     host.appendChild(svg);
     return { svg: svg, pieces: pieces, team: team, callout: callout,
              clone: clone, link: link, from: [ax, ay],
-             tabRing: tabRing, notchRing: notchRing, agentLab: agentLab,
+             tabRing: tabRing, notchRing: notchRing,
              tabLabel: tabLabel, notchLabel: notchLabel };
   }
 
@@ -293,8 +290,6 @@
       { transform: 'translate(' + ZX + 'px,' + ZY + 'px) scale(' + ZK + ')',
         opacity: 1 }
     ], { duration: 950, delay: T });
-    A(ctx.agentLab, [{ opacity: 0 }, { opacity: 1 }],
-      { duration: 420, delay: T + 520 });
     var len = ctx.link.getTotalLength ? ctx.link.getTotalLength() : 400;
     ctx.link.style.strokeDasharray = '7 7';
     A(ctx.link, [{ strokeDashoffset: len, opacity: 0 },
@@ -336,23 +331,34 @@
     //    the callout fades, the stage crops, and the boxes rise into the space.
     var header = heads[1] && heads[1].querySelector('.compagent');
     if (header && ctx.flyer) {
-      var from = ctx.clone.getBoundingClientRect();
-      var to = header.getBoundingClientRect();
-      var fly = ctx.flyer;
-      fly.style.opacity = 1;
-      fly.style.left = (from.left + from.width / 2) + 'px';
-      fly.style.top = (from.top + from.height / 2) + 'px';
-      var dx = (to.left + to.width / 2) - (from.left + from.width / 2);
-      var dy = (to.top + to.height / 2) - (from.top + from.height / 2);
-      A(fly, [{ transform: 'translate(-50%,-50%) scale(1.25)', opacity: 0 },
-              { transform: 'translate(-50%,-50%) scale(1.25)', opacity: 1, offset: .18 },
-              { transform: 'translate(calc(-50% + ' + dx + 'px),calc(-50% + ' +
-                  dy + 'px)) scale(1)', opacity: 1, offset: .86 },
-              { transform: 'translate(calc(-50% + ' + dx + 'px),calc(-50% + ' +
-                  dy + 'px)) scale(1)', opacity: 0 }],
-        { duration: 1000, delay: T, fill: 'forwards' });
+      /* The flyer is position:fixed, so its start and end have to be measured
+         in viewport coordinates at the moment it flies. Measuring them when
+         the timeline is built -- nine seconds earlier, with the section often
+         still off screen -- gave document coordinates that were simply wrong.
+         Schedule the measurement instead. */
+      var morphAt = T;
+      var timer = setTimeout(function () {
+        var from = ctx.clone.getBoundingClientRect();
+        var to = header.getBoundingClientRect();
+        var fly = ctx.flyer;
+        fly.style.left = (from.left + from.width / 2) + 'px';
+        fly.style.top = (from.top + from.height / 2) + 'px';
+        var dx = (to.left + to.width / 2) - (from.left + from.width / 2);
+        var dy = (to.top + to.height / 2) - (from.top + from.height / 2);
+        A(fly, [{ transform: 'translate(-50%,-50%) scale(1.25)', opacity: 0 },
+                { transform: 'translate(-50%,-50%) scale(1.25)', opacity: 1, offset: .18 },
+                { transform: 'translate(calc(-50% + ' + dx + 'px),calc(-50% + ' +
+                    dy + 'px)) scale(1)', opacity: 1, offset: .86 },
+                { transform: 'translate(calc(-50% + ' + dx + 'px),calc(-50% + ' +
+                    dy + 'px)) scale(1)', opacity: 0 }],
+          { duration: 1000, fill: 'both' });
+      }, morphAt);
+      anims.push({ cancel: function () { clearTimeout(timer); },
+                   effect: { getTiming: function () {
+                     return { delay: morphAt, duration: 1000, iterations: 1 }; } } });
+      // the header is geometry-free, so it can be scheduled up front
       A(header, [{ opacity: 0 }, { opacity: 0, offset: .8 }, { opacity: 1 }],
-        { duration: 1000, delay: T, fill: 'forwards' });
+        { duration: 1000, delay: T, fill: 'both' });
     }
     A(ctx.callout, [{ opacity: 1 }, { opacity: 0 }],
       { duration: 520, delay: T + 260, fill: 'forwards' });
