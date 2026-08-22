@@ -315,11 +315,11 @@ h1.big{
 .canim-stage{position:relative;width:100%;}
 .canim-svg{display:block;width:100%;height:auto;}
 .canim-scene{transform-origin:0 0;}
-.canim-letter{font-family:var(--font-ui);font-weight:700;font-size:26px;}
-.canim-teamtext{font-family:var(--font-ui);font-weight:700;font-size:17px;}
-.canim-zoomlab{font-family:var(--font-ui);font-weight:700;font-size:19px;
-  letter-spacing:.14em;}
-.canim-agentlab{font-family:var(--font-ui);font-weight:700;font-size:24px;}
+.canim-letter{font-family:var(--font-ui);font-weight:700;font-size:21px;}
+.canim-teamtext{font-family:var(--font-ui);font-weight:700;font-size:13px;}
+.canim-agentlab{font-family:var(--font-ui);font-weight:700;font-size:20px;}
+.canim-hl{font-family:var(--font-ui);font-weight:700;font-size:15px;
+  letter-spacing:.02em;}
 .canim-replay{position:absolute;right:6px;bottom:-4px;background:none;border:0;
   font-family:var(--font-ui);font-size:.72rem;letter-spacing:.06em;
   color:var(--ink3);cursor:pointer;padding:4px 6px;}
