@@ -139,15 +139,17 @@ ${THEMES.map((th, ti) => `
 <section id="future" class="band-future"><div class="sheet">
   <h2 class="fh"${D(FUTURE.headlineSrc)}>${FUTURE.headline}</h2>
   <p class="flead"${D(FUTURE.leadSrc)}>${FUTURE.lead}</p>
-  <div class="fgrid">
+  <div class="fgrid${FUTURE.fig ? ' fgrid-stack' : ''}">
     <div class="fbody">${FUTURE.paras.map(p => `<p${D(p)}>${T(p)}</p>`).join('')}</div>
     <figure class="ffig">
-      <div class="isvg">${SVG_FUTURE}</div>
-      <figcaption>The three themes are not a taxonomy of the past &#8212; they are the ingredients
-        for the problem I think is next, which needs all three at the same time.</figcaption>
+      ${FUTURE.fig
+        ? `<img src="${FUTURE.fig}" alt="" data-cap="Composable coordination"
+               data-fig="${FUTURE.fig.split('/').pop()}">`
+        : `<div class="isvg">${SVG_FUTURE}</div>`}
+      ${FUTURE.figCap ? `<figcaption${D(FUTURE.figCapSrc)}>${FUTURE.figCap}</figcaption>` : ''}
     </figure>
   </div>
-  <div class="bets">
+  <div class="bets${FUTURE.bets.length === 4 ? ' bets-2col' : ''}">
     ${FUTURE.bets.map((b, i) => `
       <div class="bet">
         <div class="bn">${String(i + 1).padStart(2, '0')}</div>
@@ -199,6 +201,14 @@ function scrollOffset() {
 }
 syncScrollOffset();
 addEventListener('resize', syncScrollOffset);
+
+/* The page is built into #app after load, so by the time a URL like
+   ...#future is processed the section does not exist yet and the browser
+   gives up. Land it once the content is there. */
+if (location.hash.length > 1) {
+  const target = document.getElementById(location.hash.slice(1));
+  if (target) requestAnimationFrame(() => goToSection(target));
+}
 
 /* Section edges are not where the title is: the hero and the closing band
    carry their own top padding, so jumping to the edge left their headline
