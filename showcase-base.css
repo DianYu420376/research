@@ -212,9 +212,11 @@ h1.big{
   margin-top:var(--gap-band);padding:var(--pad-band) 0;}
 .band-future .plate-no{color:var(--band-ink3);}
 .band-future .lab{color:var(--band-ink3);}
+/* long enough that a theme-sized 33.6px would need 926px in an 852px column,
+   so it runs slightly smaller and drops the 22ch cap to stay on one line */
 .fh{font-family:var(--font-display);font-weight:var(--w-display);
-  font-size:clamp(1.7rem,3.4vw,2.5rem);line-height:var(--lh-display);
-  letter-spacing:var(--ls-display);margin:6px 0 18px;max-width:22ch;color:var(--band-hi);}
+  font-size:clamp(1.4rem,2.6vw,1.84rem);line-height:var(--lh-display);
+  letter-spacing:var(--ls-display);margin:6px 0 18px;color:var(--band-hi);}
 .flead{font-family:var(--font-display);font-size:1.2rem;font-style:var(--fi-quote);
   color:var(--band-ink);max-width:44ch;margin:0 0 22px;}
 .fgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;align-items:start;}
@@ -314,9 +316,11 @@ h1.big{
 .fgn{font-family:var(--font-ui);font-weight:var(--w-lab);font-size:.82rem;
   letter-spacing:.03em;display:block;margin-bottom:6px;}
 .fgcell p{font-size:.86rem;color:var(--band-ink2);margin:0;line-height:1.55;}
-.pull{margin-top:48px;border-top:1px solid var(--band-rule);padding-top:26px;
-  font-family:var(--font-display);font-size:clamp(1.12rem,2.1vw,1.42rem);line-height:1.4;
-  font-style:var(--fi-quote);max-width:52ch;color:var(--band-hi);}
+/* too long a paragraph to carry pull-quote treatment: set as body prose,
+   at the same measure as every other section */
+.pull{margin-top:40px;border-top:1px solid var(--band-rule);padding-top:22px;
+  font-family:var(--font-body);font-size:1rem;line-height:var(--lh-body);
+  font-style:normal;max-width:80ch;color:var(--band-ink2);}
 
 /* ---------- references ---------- */
 #refs ol{counter-reset:r;margin-top:18px;}
