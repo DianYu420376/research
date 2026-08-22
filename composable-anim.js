@@ -125,7 +125,7 @@
   }
 
   /* ---------- timeline ---------- */
-  function run(ctx, panels, heads, section, done) {
+  function run(ctx, heads, comps, done) {
     var anims = [];
     function A(node, frames, opts) {
       var a = node.animate(frames, Object.assign({ fill: 'both',
@@ -163,56 +163,41 @@
     ctx.team.style.transformOrigin = tcxy();
     T += 460 + 420;
 
-    // 3. zoom to piece A
-    var zx = GX + S / 2, zy = GY + S / 2, k = 2.3;
-    A(ctx.scene, [
-      { transform: 'translate(0px,0px) scale(1)' },
-      { transform: 'translate(' + (550 - zx * k) + 'px,' + (250 - zy * k) +
-          'px) scale(' + k + ')' }
-    ], { duration: 1000, delay: T });
+    // 3. zoom toward piece A. The assembled puzzle stays on screen, so this
+    //    is a modest push-in with the others dimmed rather than a hard crop.
+    var zx = GX + S / 2, zy = GY + S / 2, k = 1.55;
+    var zoomIn = 'translate(' + (520 - zx * k) + 'px,' + (250 - zy * k) +
+                 'px) scale(' + k + ')';
+    A(ctx.scene, [{ transform: 'translate(0px,0px) scale(1)' },
+                  { transform: zoomIn }], { duration: 900, delay: T });
     ctx.pieces.forEach(function (g, i) {
       if (i === 0) return;
-      A(g, [{ opacity: 1 }, { opacity: .12 }], { duration: 700, delay: T + 200 });
+      A(g, [{ opacity: 1 }, { opacity: .38 }], { duration: 640, delay: T + 160 });
     });
-    A(ctx.team, [{ opacity: 1 }, { opacity: .12 }], { duration: 700, delay: T + 200 });
-    T += 1000 + 260;
+    A(ctx.team, [{ opacity: 1 }, { opacity: .38 }], { duration: 640, delay: T + 160 });
+    T += 900 + 260;
 
-    // 4. unfold into three panels
-    A(ctx.svg, [{ opacity: 1 }, { opacity: 0 }], { duration: 520, delay: T });
-    panels.forEach(function (p, i) {
-      p.style.opacity = 0;
-      A(p, [
-        { opacity: 0, transform: 'translateY(26px) scale(.9)' },
-        { opacity: 1, transform: 'translateY(0) scale(1)' }
-      ], { duration: 620, delay: T + 180 + i * 150 });
+    // 4. the real boxes rise into place. They are the ending, not a stand-in:
+    //    once here they stay, and clicking one opens its detail as usual.
+    if (comps) comps.classList.remove('canim-pending');
+    heads.forEach(function (h, i) {
+      A(h, [{ opacity: 0, transform: 'translateY(16px)' },
+             { opacity: 1, transform: 'translateY(0)' }],
+        { duration: 560, delay: T + i * 150 });
     });
-    // hold: the three panels are the point of the sequence, and at 700ms
-    // they were fully visible for barely half a second before flying off
-    T += 620 + 2 * 150 + 1700;
+    T += 560 + 2 * 150 + 420;
 
-    // 5. hand off to the real boxes below
-    if (heads.length === 3) {
-      var srect = section.getBoundingClientRect();
-      panels.forEach(function (p, i) {
-        var from = p.getBoundingClientRect();
-        var to = heads[i].getBoundingClientRect();
-        var dx = to.left - from.left, dy = to.top - from.top;
-        var sx = to.width / from.width, sy = to.height / from.height;
-        A(p, [
-          { transform: 'translate(0,0) scale(1,1)', opacity: 1 },
-          { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' +
-              sx.toFixed(3) + ',' + sy.toFixed(3) + ')', opacity: 0 }
-        ], { duration: 900, delay: T });
-      });
-      heads.forEach(function (h, i) {
-        A(h, [{ boxShadow: '0 0 0 0 rgba(122,46,34,0)' },
-               { boxShadow: '0 0 0 3px rgba(122,46,34,.28)' },
-               { boxShadow: '0 0 0 0 rgba(122,46,34,0)' }],
-          { duration: 900, delay: T + 420 + i * 90 });
-      });
-      void srect;
-      T += 900;
-    }
+    // 5. pull back so the finished puzzle and the three boxes read together
+    A(ctx.scene, [{ transform: zoomIn },
+                  { transform: 'translate(0px,0px) scale(1)' }],
+      { duration: 820, delay: T });
+    ctx.pieces.forEach(function (g, i) {
+      if (i === 0) return;
+      A(g, [{ opacity: .38 }, { opacity: 1 }], { duration: 700, delay: T });
+    });
+    A(ctx.team, [{ opacity: .38 }, { opacity: 1 }], { duration: 700, delay: T });
+    T += 820;
+
     setTimeout(done, T + 120);
     return anims;
   }
@@ -227,6 +212,10 @@
     if (!document.body.animate) return;                   // no WAAPI: keep the PNG
     if (window.matchMedia &&
         window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    // Narrow screens keep the PNG: the scene needs width to read, and the
+    // boxes stack there anyway. Bail out before hiding the image, or the
+    // figure would vanish entirely.
+    if (window.innerWidth < 700) return;
 
     var wrap = document.createElement('div');
     wrap.className = 'canim';
@@ -235,25 +224,6 @@
     wrap.appendChild(stage);
 
     var ctx = build(stage);
-
-    // the three unfolded panels, in the figure's order
-    var LABELS = [
-      { t: 'Incoming interface', s: 'How the agent responds', c: C.purple },
-      { t: 'Train for composability', s: 'How the agent is built', c: C.blue },
-      { t: 'Outgoing interface', s: 'What the agent sends', c: C.orange }
-    ];
-    var row = document.createElement('div');
-    row.className = 'canim-panels';
-    var panels = LABELS.map(function (l) {
-      var p = document.createElement('div');
-      p.className = 'canim-panel';
-      p.style.borderColor = l.c;
-      p.innerHTML = '<span class="canim-pt" style="color:' + l.c + '">' +
-        l.t + '</span><span class="canim-ps">' + l.s + '</span>';
-      row.appendChild(p);
-      return p;
-    });
-    stage.appendChild(row);
 
     var replay = document.createElement('button');
     replay.className = 'canim-replay';
@@ -265,19 +235,23 @@
     img.hidden = true;
     fig.insertBefore(wrap, fig.firstChild);
 
-    var section = document.getElementById('future');
+    var comps = document.querySelector('#future .comps');
     var heads = [].slice.call(document.querySelectorAll('#future .comphead'));
+    // held back until the zoom, but only once we know we can animate them:
+    // with JS off or reduced motion the boxes must simply be there
+    if (comps && heads.length) comps.classList.add('canim-pending');
     var live = [];
     function reset() {
       live.forEach(function (a) { a.cancel(); });
       live = [];
       ctx.svg.style.opacity = '';
-      panels.forEach(function (p) { p.style.opacity = 0; });
+      ctx.scene.style.transform = '';
+      if (comps && heads.length) comps.classList.add('canim-pending');
     }
     function play() {
       reset();
       replay.hidden = true;
-      live = run(ctx, panels, heads, section, function () { replay.hidden = false; });
+      live = run(ctx, heads, comps, function () { replay.hidden = false; });
     }
     replay.addEventListener('click', play);
 

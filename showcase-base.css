@@ -222,7 +222,9 @@ h1.big{
 .fgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;align-items:start;}
 @media (max-width:940px){.fgrid{grid-template-columns:minmax(0,1fr);gap:26px;}}
 .fbody p{font-size:1rem;color:var(--band-ink2);margin:0 0 14px;max-width:80ch;}
-.ffig{border:1px solid var(--band-rule);background:var(--band-fig-bg);padding:12px;}
+/* the closing figure sits straight on the page rather than on a white card:
+   the animation is transparent SVG, so the paper reads through it */
+.ffig{border:0;background:transparent;padding:0;}
 .ffig figcaption{font-size:.82rem;color:var(--band-ink3);margin-top:9px;line-height:1.5;}
 .bets{margin-top:40px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;}
 /* ---------- closing section: three grounds to choose between ----------
@@ -236,23 +238,33 @@ h1.big{
   --band-ink2:var(--ink2);--band-ink3:var(--ink3);--band-hi:var(--ink);
   --band-rule:#d5cdba;--band-fig-bg:#ffffff;}
 /* 'dark' keeps the original band values and instead mats the figure */
-.future-dark #future .ffig{padding:22px;border-radius:4px;background:#fff;
-  border-color:transparent;}
+.future-dark #future .ffig{padding:22px;border-radius:4px;background:#fff;}
 .future-dark #future .ffig figcaption{color:var(--ink3);}
 
 /* ---------- the three interlocking component heads ----------
    They sit in one unbroken row and interlock at the seams, echoing the
    figure. The detail opens in a shared panel below, at full measure. */
-.comps{margin-top:34px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));}
+.comps{margin-top:34px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  --c1:#7c5cc4;--c2:#2f6fd0;--c3:#d97a12;}
+/* rounded panels with a coloured rule and title, as in the figure */
 .comphead{position:relative;display:block;text-align:left;font:inherit;color:inherit;
-  background:var(--card);border:1px solid var(--band-rule);margin-left:-1px;
-  padding:16px 18px;cursor:pointer;transition:background .18s;}
+  background:var(--card);border:1.5px solid var(--bc,var(--band-rule));
+  border-radius:12px;margin-left:-1px;padding:15px 17px;cursor:pointer;
+  transition:background .18s,box-shadow .18s;}
+.comphead:nth-child(1){--bc:color-mix(in srgb,var(--c1) 45%,transparent);}
+.comphead:nth-child(2){--bc:color-mix(in srgb,var(--c2) 45%,transparent);}
+.comphead:nth-child(3){--bc:color-mix(in srgb,var(--c3) 45%,transparent);}
+.comphead:nth-child(1) .compt{color:var(--c1);}
+.comphead:nth-child(2) .compt{color:var(--c2);}
+.comphead:nth-child(3) .compt{color:var(--c3);}
 .comphead:first-child{margin-left:0;}
 .comphead:hover{background:var(--hover);}
-.comphead.on{background:var(--panel);border-color:var(--ink3);z-index:2;}
+.comphead.on{background:var(--panel);box-shadow:0 0 0 2px var(--bc);z-index:2;}
+/* held back until the animation reveals them; without JS they are simply here */
+.comps.canim-pending .comphead{opacity:0;}
 .compn{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;
   color:var(--ink3);display:block;}
-.compt{font-family:var(--font-display);font-size:1.08rem;color:var(--ink);
+.compt{font-family:var(--font-display);font-size:1.08rem;
   display:block;margin:3px 0 6px;line-height:1.25;}
 .compsum{font-size:.9rem;color:var(--ink2);display:block;line-height:1.5;}
 .compgo{font-family:var(--font-ui);font-size:.72rem;letter-spacing:.06em;
@@ -266,7 +278,7 @@ h1.big{
 .seam::before{top:0;height:calc(50% - 13px);}
 .seam::after{bottom:0;height:calc(50% - 13px);}
 .seam i{position:absolute;left:0;top:calc(50% - 11px);width:22px;height:22px;
-  border:1px solid var(--band-rule);border-left-color:transparent;
+  border:1.5px solid var(--band-rule);border-left-color:transparent;
   border-radius:50%;background:var(--card);}
 .comphead.on .seam i,.comphead.on + .comphead .seam i{background:var(--panel);}
 
@@ -301,24 +313,11 @@ h1.big{
 .canim-scene{transform-origin:0 0;}
 .canim-letter{font-family:var(--font-ui);font-weight:700;font-size:26px;}
 .canim-teamtext{font-family:var(--font-ui);font-weight:700;font-size:17px;}
-.canim-panels{position:absolute;inset:auto 0 8% 0;display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:0 4%;
-  pointer-events:none;}
-.canim-panel{background:var(--card);border:2px solid var(--rule);border-radius:10px;
-  padding:14px 15px;opacity:0;will-change:transform,opacity;
-  box-shadow:0 6px 22px rgba(0,0,0,.07);}
-.canim-pt{display:block;font-family:var(--font-ui);font-weight:700;
-  font-size:.92rem;line-height:1.25;}
-.canim-ps{display:block;font-size:.82rem;color:var(--ink2);margin-top:4px;}
 .canim-replay{position:absolute;right:6px;bottom:-4px;background:none;border:0;
   font-family:var(--font-ui);font-size:.72rem;letter-spacing:.06em;
   color:var(--ink3);cursor:pointer;padding:4px 6px;}
 .canim-replay:hover{color:var(--accent);}
-@media (max-width:640px){
-  .canim-panels{position:static;margin-top:10px;padding:0;
-    grid-template-columns:minmax(0,1fr);gap:8px;}
-  .canim-panel{opacity:1 !important;}
-}
+/* below 700px the script does not mount at all and the PNG stays */
 
 /* editor only: the three component details stacked, each labelled */
 .edcomp + .edcomp{margin-top:20px;padding-top:18px;border-top:1px solid var(--rule2);}
