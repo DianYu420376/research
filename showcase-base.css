@@ -263,8 +263,13 @@ h1.big{
 .comphead:nth-child(2){--bc:var(--c2);--bg:#e6ecf6;--bg2:#f0f5fc;}
 .comphead:nth-child(3){--bc:var(--c3);--bg:#fbf0e5;--bg2:#fef8f1;}
 .comphead .compt{color:var(--bc);}
+/* the same texture the puzzle pieces carry -- the figure's own pixels -- laid
+   over the gradient at a finer scale so it reads as grain, not as a motif */
 .comphead{
-  background:linear-gradient(180deg,var(--bg2,var(--card)) 0%,var(--bg,var(--card)) 78%);
+  background-image:url(figs/key_figs/piece-texture.png),
+    linear-gradient(180deg,var(--bg2,var(--card)) 0%,var(--bg,var(--card)) 78%);
+  background-size:78px 78px,auto;
+  background-repeat:repeat,no-repeat;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.85),
              0 1px 2px rgba(27,42,99,.05),
              0 6px 16px rgba(27,42,99,.07);}
@@ -296,7 +301,8 @@ h1.big{
 .seam::after{bottom:0;height:calc(50% - 13px);}
 .seam i{position:absolute;left:0;top:calc(50% - 11px);width:22px;height:22px;
   border:2px solid var(--bc,var(--band-rule));border-left-color:transparent;
-  border-radius:50%;background:var(--bg2,var(--card));}
+  border-radius:50%;background:var(--bg2,var(--card));
+  background-image:url(figs/key_figs/piece-texture.png);background-size:78px 78px;}
 .comphead.on .seam i,.comphead.on + .comphead .seam i{background:var(--panel);}
 
 /* shared detail panel, full width so the prose has a real measure */
@@ -304,12 +310,14 @@ h1.big{
   border-left:1px solid var(--band-rule);border-right:1px solid var(--band-rule);}
 .comppanel.on{border-bottom:1px solid var(--band-rule);}
 .comppanel-in{padding:22px 20px 24px;
-  background:linear-gradient(180deg,rgba(255,255,255,.55),transparent 120px),
-    var(--panel);
+  background-image:url(figs/key_figs/piece-texture.png),
+    linear-gradient(180deg,var(--pbg2,var(--panel)) 0%,var(--pbg,var(--panel)) 60%);
+  background-size:78px 78px,auto;
+  background-repeat:repeat,no-repeat;
   border-top:2px solid var(--pc,var(--band-rule));}
-.comppanel[data-comp="0"]{--pc:var(--c1);}
-.comppanel[data-comp="1"]{--pc:var(--c2);}
-.comppanel[data-comp="2"]{--pc:var(--c3);}
+.comppanel[data-comp="0"]{--pc:var(--c1);--pbg:#f0ecf3;--pbg2:#f7f4fa;}
+.comppanel[data-comp="1"]{--pc:var(--c2);--pbg:#e6ecf6;--pbg2:#f0f5fc;}
+.comppanel[data-comp="2"]{--pc:var(--c3);--pbg:#fbf0e5;--pbg2:#fef8f1;}
 .comppanel[data-comp] .compqs .lab{color:var(--pc);}
 .comppanel[data-comp] .comptext p strong{color:var(--pc);}
 /* prose first at the page's own measure, questions beneath it in columns:
@@ -341,15 +349,6 @@ h1.big{
 .canim-teamtext{font-family:var(--font-ui);font-weight:700;font-size:13px;}
 .canim-hl{font-family:var(--font-ui);font-weight:700;font-size:15px;
   letter-spacing:.02em;}
-/* the robot and name in flight from the examined piece to the box header */
-.canim-flyer{position:fixed;left:0;top:0;z-index:50;opacity:0;pointer-events:none;
-  display:flex;align-items:center;gap:9px;color:#1b2a63;
-  font-family:var(--font-ui);font-weight:700;font-size:1.32rem;letter-spacing:-.01em;
-  line-height:1;will-change:transform,opacity;}
-.canim-flyer svg{display:block;}
-/* held back until the flight lands */
-.comps.canim-pending .compagent{opacity:0;}
-
 .canim-replay{position:absolute;right:6px;bottom:-4px;background:none;border:0;
   font-family:var(--font-ui);font-size:.72rem;letter-spacing:.06em;
   color:var(--ink3);cursor:pointer;padding:4px 6px;}

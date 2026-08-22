@@ -326,46 +326,14 @@
     reveal(heads[0], T);                    // Incoming interface
     T += 520 + 360;
 
-    // 6. the examined agent hands itself over: its robot and name fly into the
-    //    middle box's header, which is held back until they land. The rest of
-    //    the callout fades, the stage crops, and the boxes rise into the space.
-    var header = heads[1] && heads[1].querySelector('.compagent');
-    if (header && ctx.flyer) {
-      /* The flyer is position:fixed, so its start and end have to be measured
-         in viewport coordinates at the moment it flies. Measuring them when
-         the timeline is built -- nine seconds earlier, with the section often
-         still off screen -- gave document coordinates that were simply wrong.
-         Schedule the measurement instead. */
-      var morphAt = T;
-      var timer = setTimeout(function () {
-        var from = ctx.clone.getBoundingClientRect();
-        var to = header.getBoundingClientRect();
-        var fly = ctx.flyer;
-        fly.style.left = (from.left + from.width / 2) + 'px';
-        fly.style.top = (from.top + from.height / 2) + 'px';
-        var dx = (to.left + to.width / 2) - (from.left + from.width / 2);
-        var dy = (to.top + to.height / 2) - (from.top + from.height / 2);
-        A(fly, [{ transform: 'translate(-50%,-50%) scale(1.25)', opacity: 0 },
-                { transform: 'translate(-50%,-50%) scale(1.25)', opacity: 1, offset: .18 },
-                { transform: 'translate(calc(-50% + ' + dx + 'px),calc(-50% + ' +
-                    dy + 'px)) scale(1)', opacity: 1, offset: .86 },
-                { transform: 'translate(calc(-50% + ' + dx + 'px),calc(-50% + ' +
-                    dy + 'px)) scale(1)', opacity: 0 }],
-          { duration: 1000, fill: 'both' });
-      }, morphAt);
-      anims.push({ cancel: function () { clearTimeout(timer); },
-                   effect: { getTiming: function () {
-                     return { delay: morphAt, duration: 1000, iterations: 1 }; } } });
-      // the header is geometry-free, so it can be scheduled up front
-      A(header, [{ opacity: 0 }, { opacity: 0, offset: .8 }, { opacity: 1 }],
-        { duration: 1000, delay: T, fill: 'both' });
-    }
+    // 6. the examined agent has done its job: it fades, the stage crops to the
+    //    puzzle, and the three boxes rise into the space it leaves.
     A(ctx.callout, [{ opacity: 1 }, { opacity: 0 }],
-      { duration: 520, delay: T + 260, fill: 'forwards' });
+      { duration: 520, delay: T, fill: 'forwards' });
     A(ctx.stage, [{ paddingBottom: (VH / VW * 100).toFixed(2) + '%' },
                   { paddingBottom: (CROP / VW * 100).toFixed(2) + '%' }],
       { duration: 760, delay: T + 160, fill: 'forwards' });
-    T += 1000 + 200;
+    T += 760 + 200;
 
     // 7. the team comes back to full strength; everything stays on screen.
     //    fill 'forwards', not 'both': with 'both' this step's first keyframe
@@ -406,22 +374,6 @@
     var ctx = build(stage);
     ctx.stage = stage;
 
-    /* the thing that travels: a copy of the robot mark and the name, positioned
-       over the page so it can fly from the SVG into the box's header */
-    var flyer = document.createElement('div');
-    flyer.className = 'canim-flyer';
-    flyer.setAttribute('aria-hidden', 'true');
-    flyer.innerHTML =
-      '<svg width="23" height="23" viewBox="0 0 24 24" fill="none" ' +
-      'stroke="currentColor" stroke-width="1.9" stroke-linecap="round">' +
-      '<path d="M12 3v2.4"/><circle cx="12" cy="2.2" r="1.2" fill="currentColor" ' +
-      'stroke="none"/><rect x="4.2" y="5.6" width="15.6" height="12.4" rx="3.4"/>' +
-      '<circle cx="9.2" cy="11.2" r="1.25" fill="currentColor" stroke="none"/>' +
-      '<circle cx="14.8" cy="11.2" r="1.25" fill="currentColor" stroke="none"/>' +
-      '<path d="M9.4 14.4q2.6 2 5.2 0"/></svg><span>Agent A</span>';
-    document.body.appendChild(flyer);
-    ctx.flyer = flyer;
-
     var replay = document.createElement('button');
     replay.className = 'canim-replay';
     replay.type = 'button';
@@ -442,9 +394,6 @@
       live = [];
       ctx.callout.style.opacity = 0;
       ctx.stage.style.paddingBottom = (VH / VW * 100).toFixed(2) + '%';
-      if (ctx.flyer) ctx.flyer.style.opacity = 0;
-      var hd = heads[1] && heads[1].querySelector('.compagent');
-      if (hd) hd.style.opacity = 0;
       if (comps && heads.length === 3) comps.classList.add('canim-pending');
     }
     function play() {
