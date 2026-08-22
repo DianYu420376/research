@@ -291,6 +291,35 @@ h1.big{
 .compqs li{font-size:.9rem;color:var(--ink2);margin:0 0 8px;line-height:1.5;
   break-inside:avoid;}
 
+/* ---------- animated closing figure ----------
+   Replaces the static PNG when the browser can drive it. The PNG stays in the
+   DOM, hidden, as the fallback for reduced-motion and for browsers without
+   the Web Animations API. */
+.canim{position:relative;}
+.canim-stage{position:relative;width:100%;}
+.canim-svg{display:block;width:100%;height:auto;}
+.canim-scene{transform-origin:0 0;}
+.canim-letter{font-family:var(--font-ui);font-weight:700;font-size:26px;}
+.canim-teamtext{font-family:var(--font-ui);font-weight:700;font-size:17px;}
+.canim-panels{position:absolute;inset:auto 0 8% 0;display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:0 4%;
+  pointer-events:none;}
+.canim-panel{background:var(--card);border:2px solid var(--rule);border-radius:10px;
+  padding:14px 15px;opacity:0;will-change:transform,opacity;
+  box-shadow:0 6px 22px rgba(0,0,0,.07);}
+.canim-pt{display:block;font-family:var(--font-ui);font-weight:700;
+  font-size:.92rem;line-height:1.25;}
+.canim-ps{display:block;font-size:.82rem;color:var(--ink2);margin-top:4px;}
+.canim-replay{position:absolute;right:6px;bottom:-4px;background:none;border:0;
+  font-family:var(--font-ui);font-size:.72rem;letter-spacing:.06em;
+  color:var(--ink3);cursor:pointer;padding:4px 6px;}
+.canim-replay:hover{color:var(--accent);}
+@media (max-width:640px){
+  .canim-panels{position:static;margin-top:10px;padding:0;
+    grid-template-columns:minmax(0,1fr);gap:8px;}
+  .canim-panel{opacity:1 !important;}
+}
+
 /* editor only: the three component details stacked, each labelled */
 .edcomp + .edcomp{margin-top:20px;padding-top:18px;border-top:1px solid var(--rule2);}
 .edcomplab{display:block;margin-bottom:8px;color:var(--accent);}
@@ -304,6 +333,9 @@ h1.big{
 .fgrid-stack{grid-template-columns:minmax(0,1fr);gap:26px;}
 .ffig img{width:100%;height:auto;display:block;background:#fff;border-radius:2px;
   cursor:zoom-in;}
+/* display:block above outranks the hidden attribute, so the fallback PNG
+   stayed visible under the animation until this said otherwise */
+.ffig img[hidden]{display:none;}
 .bet{border-top:2px solid var(--band-rule);padding-top:13px;}
 .bet .bn{font-family:var(--font-mono);font-size:.72rem;color:var(--band-ink3);letter-spacing:.1em;}
 .bet h3{font-family:var(--font-display);font-size:1.08rem;font-weight:var(--w-display);
