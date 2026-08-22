@@ -251,25 +251,23 @@ h1.big{
   background:var(--card);border:1.5px solid var(--bc,var(--band-rule));
   border-radius:12px;margin-left:-1px;padding:15px 17px;cursor:pointer;
   transition:background .18s,box-shadow .18s;}
-.comphead:nth-child(1){--bc:color-mix(in srgb,var(--c1) 45%,transparent);}
-.comphead:nth-child(2){--bc:color-mix(in srgb,var(--c2) 45%,transparent);}
-.comphead:nth-child(3){--bc:color-mix(in srgb,var(--c3) 45%,transparent);}
-.comphead:nth-child(1) .compt{color:var(--c1);}
-.comphead:nth-child(2) .compt{color:var(--c2);}
-.comphead:nth-child(3) .compt{color:var(--c3);}
+/* tinted panels, as in the figure: coloured rule, coloured title, faint wash */
+.comphead:nth-child(1){--bc:var(--c1);--bg:#f7f3fd;}
+.comphead:nth-child(2){--bc:var(--c2);--bg:#eff5fe;}
+.comphead:nth-child(3){--bc:var(--c3);--bg:#fef6ec;}
+.comphead .compt{color:var(--bc);}
+.comphead{background:var(--bg,var(--card));}
 .comphead:first-child{margin-left:0;}
-.comphead:hover{background:var(--hover);}
-.comphead.on{background:var(--panel);box-shadow:0 0 0 2px var(--bc);z-index:2;}
+.comphead:hover{filter:brightness(.985);}
+.comphead.on{box-shadow:0 0 0 2px var(--bc);z-index:2;}
 /* held back until the animation reveals them; without JS they are simply here */
 .comps.canim-pending .comphead{opacity:0;}
-.compn{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;
-  color:var(--ink3);display:block;}
 .compt{font-family:var(--font-display);font-size:1.08rem;
-  display:block;margin:3px 0 6px;line-height:1.25;}
+  display:block;margin:0 0 6px;line-height:1.25;}
 .compsum{font-size:.9rem;color:var(--ink2);display:block;line-height:1.5;}
 .compgo{font-family:var(--font-ui);font-size:.72rem;letter-spacing:.06em;
   color:var(--ink3);display:block;margin-top:10px;}
-.comphead:hover .compgo,.comphead.on .compgo{color:var(--accent);}
+.comphead:hover .compgo,.comphead.on .compgo{color:var(--bc);}
 
 /* the seam: a broken rule with a tab bulging into the next box */
 .seam{position:absolute;left:-11px;top:0;bottom:0;width:22px;pointer-events:none;}
@@ -279,14 +277,20 @@ h1.big{
 .seam::after{bottom:0;height:calc(50% - 13px);}
 .seam i{position:absolute;left:0;top:calc(50% - 11px);width:22px;height:22px;
   border:1.5px solid var(--band-rule);border-left-color:transparent;
-  border-radius:50%;background:var(--card);}
+  border-radius:50%;background:var(--bg,var(--card));}
 .comphead.on .seam i,.comphead.on + .comphead .seam i{background:var(--panel);}
 
 /* shared detail panel, full width so the prose has a real measure */
 .comppanel{height:0;overflow:hidden;transition:height .3s ease;
   border-left:1px solid var(--band-rule);border-right:1px solid var(--band-rule);}
 .comppanel.on{border-bottom:1px solid var(--band-rule);}
-.comppanel-in{padding:20px 18px 22px;background:var(--panel);}
+.comppanel-in{padding:20px 18px 22px;background:var(--panel);
+  border-top:2px solid var(--pc,var(--band-rule));}
+.comppanel[data-comp="0"]{--pc:var(--c1);}
+.comppanel[data-comp="1"]{--pc:var(--c2);}
+.comppanel[data-comp="2"]{--pc:var(--c3);}
+.comppanel[data-comp] .compqs .lab{color:var(--pc);}
+.comppanel[data-comp] .comptext p strong{color:var(--pc);}
 /* prose first at the page's own measure, questions beneath it in columns:
    splitting the panel side by side put the text back at ~55 characters */
 .compcols{display:block;}
@@ -313,6 +317,9 @@ h1.big{
 .canim-scene{transform-origin:0 0;}
 .canim-letter{font-family:var(--font-ui);font-weight:700;font-size:26px;}
 .canim-teamtext{font-family:var(--font-ui);font-weight:700;font-size:17px;}
+.canim-zoomlab{font-family:var(--font-ui);font-weight:700;font-size:19px;
+  letter-spacing:.14em;}
+.canim-agentlab{font-family:var(--font-ui);font-weight:700;font-size:24px;}
 .canim-replay{position:absolute;right:6px;bottom:-4px;background:none;border:0;
   font-family:var(--font-ui);font-size:.72rem;letter-spacing:.06em;
   color:var(--ink3);cursor:pointer;padding:4px 6px;}

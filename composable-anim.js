@@ -80,15 +80,16 @@
   var TEAM = { col: 1, row: 1, e: [-1, 1, 0, 1] };
   // where each piece starts, scattered on the left
   var START = [
-    { x: 120, y: 120, r: -14 }, { x: 330, y: 78,  r: 11 },
-    { x: 60,  y: 300, r: 8 },   { x: 250, y: 320, r: -7 },
-    { x: 400, y: 286, r: 15 }
+    { x: 40,  y: 20,  r: -14 }, { x: 300, y: 4,   r: 11 },
+    { x: 690, y: 30,  r: 8 },   { x: 250, y: 268, r: -7 },
+    { x: 700, y: 250, r: 15 }
   ];
-  var GX = 560, GY = 96;                      // grid origin
+  var GX = 74, GY = 62;                       // grid origin
+  var ZX = 706, ZY = 96, ZK = 1.5;            // where agent A is examined
 
   function build(host) {
     var svg = el('svg', {
-      viewBox: '0 0 1100 560', class: 'canim-svg',
+      viewBox: '0 0 990 410', class: 'canim-svg',
       role: 'img', 'aria-label':
         'Independently trained agents assembling into a coordinated team, ' +
         'then one agent unfolding into its incoming interface, training, ' +
@@ -120,8 +121,38 @@
       return g;
     });
 
+    /* The zoom is shown the way the figure shows it: the assembled puzzle
+       stays whole and a copy of agent A is drawn out of it, joined by dashed
+       connectors. Scaling the camera instead made it ambiguous which piece
+       was being examined. */
+    var callout = el('g', { class: 'canim-callout', opacity: '0' }, svg);
+    var ax = GX + SLOTS[0].col * S, ay = GY + SLOTS[0].row * S;
+    var gx2 = GX + 3 * S, my = GY + S;          // right edge, vertical middle
+    var link = el('path', {
+      class: 'canim-link',
+      d: 'M ' + (gx2 + 26) + ' ' + my + ' C ' + (gx2 + 96) + ' ' + my + ', ' +
+         (ZX - 86) + ' ' + (ZY + S * ZK / 2) + ', ' + (ZX - 24) + ' ' +
+         (ZY + S * ZK / 2),
+      fill: 'none', stroke: C.ink, 'stroke-width': 2.2, 'stroke-dasharray': '9 8',
+      opacity: .55
+    }, callout);
+    el('text', { x: (gx2 + ZX) / 2 + 4, y: my - 30, 'text-anchor': 'middle',
+      class: 'canim-zoomlab', fill: C.ink, opacity: .75 },
+      callout).textContent = 'ZOOM IN';
+
+    var clone = el('g', { class: 'canim-clone' }, callout);
+    el('path', { d: piecePath(S, SLOTS[0].e), fill: SLOTS[0].c,
+                 stroke: 'rgba(0,0,0,.13)', 'stroke-width': 1.5 }, clone);
+    robot(clone, S / 2, S / 2 - 4, C.ink);
+    el('text', { x: S / 2, y: S / 2 + 42, 'text-anchor': 'middle',
+      class: 'canim-letter', fill: C.ink }, clone).textContent = 'A';
+    el('text', { x: ZX + S * ZK / 2, y: ZY + S * ZK + 40, 'text-anchor': 'middle',
+      class: 'canim-agentlab', fill: C.ink }, callout).textContent = 'Agent A';
+
     host.appendChild(svg);
-    return { svg: svg, scene: scene, pieces: pieces, team: team };
+    return { svg: svg, scene: scene, pieces: pieces, team: team,
+             callout: callout, clone: clone, link: link,
+             from: [ax, ay] };
   }
 
   /* ---------- timeline ---------- */
@@ -157,51 +188,55 @@
       ], { duration: 900, delay: T + i * 90 });
     });
     T += 900 + 4 * 90;
-    A(ctx.team, [{ opacity: 0, transform: 'scale(.86)' },
-                 { opacity: 1, transform: 'scale(1)' }],
-      { duration: 460, delay: T });
-    ctx.team.style.transformOrigin = tcxy();
+    A(ctx.team, [{ opacity: 0 }, { opacity: 1 }], { duration: 460, delay: T });
     T += 460 + 420;
 
-    // 3. zoom toward piece A. The assembled puzzle stays on screen, so this
-    //    is a modest push-in with the others dimmed rather than a hard crop.
-    var zx = GX + S / 2, zy = GY + S / 2, k = 1.55;
-    var zoomIn = 'translate(' + (520 - zx * k) + 'px,' + (250 - zy * k) +
-                 'px) scale(' + k + ')';
-    A(ctx.scene, [{ transform: 'translate(0px,0px) scale(1)' },
-                  { transform: zoomIn }], { duration: 900, delay: T });
+    // 3. pull a copy of agent A out of the assembled puzzle. The grid stays
+    //    exactly where it is, so it is unmistakable which piece is examined.
+    var from = ctx.from;
+    ctx.clone.style.transformBox = 'fill-box';
+    ctx.callout.style.opacity = 1;
+    A(ctx.clone, [
+      { transform: 'translate(' + from[0] + 'px,' + from[1] + 'px) scale(1)',
+        opacity: 0 },
+      { transform: 'translate(' + ZX + 'px,' + ZY + 'px) scale(' + ZK + ')',
+        opacity: 1 }
+    ], { duration: 950, delay: T });
+    // the connector draws itself in behind the travelling piece
+    var len = ctx.link.getTotalLength ? ctx.link.getTotalLength() : 600;
+    ctx.link.style.strokeDasharray = '9 8';
+    A(ctx.link, [{ strokeDashoffset: len, opacity: 0 },
+                 { strokeDashoffset: 0, opacity: .55 }],
+      { duration: 800, delay: T + 200 });
+    // the puzzle recedes a little so the examined agent leads
     ctx.pieces.forEach(function (g, i) {
-      if (i === 0) return;
-      A(g, [{ opacity: 1 }, { opacity: .38 }], { duration: 640, delay: T + 160 });
+      A(g, [{ opacity: 1 }, { opacity: i === 0 ? 1 : .42 }],
+        { duration: 620, delay: T + 260 });
     });
-    A(ctx.team, [{ opacity: 1 }, { opacity: .38 }], { duration: 640, delay: T + 160 });
-    T += 900 + 260;
+    A(ctx.team, [{ opacity: 1 }, { opacity: .42 }], { duration: 620, delay: T + 260 });
+    T += 950 + 340;
 
-    // 4. the real boxes rise into place. They are the ending, not a stand-in:
-    //    once here they stay, and clicking one opens its detail as usual.
+    // 4. the real boxes rise in beside the examined agent and stay: what you
+    //    watch arrive is the same thing you then click.
     if (comps) comps.classList.remove('canim-pending');
     heads.forEach(function (h, i) {
       A(h, [{ opacity: 0, transform: 'translateY(16px)' },
              { opacity: 1, transform: 'translateY(0)' }],
         { duration: 560, delay: T + i * 150 });
     });
-    T += 560 + 2 * 150 + 420;
+    T += 560 + 2 * 150 + 300;
 
-    // 5. pull back so the finished puzzle and the three boxes read together
-    A(ctx.scene, [{ transform: zoomIn },
-                  { transform: 'translate(0px,0px) scale(1)' }],
-      { duration: 820, delay: T });
+    // 5. bring the puzzle back to full strength; everything stays on screen
     ctx.pieces.forEach(function (g, i) {
       if (i === 0) return;
-      A(g, [{ opacity: .38 }, { opacity: 1 }], { duration: 700, delay: T });
+      A(g, [{ opacity: .42 }, { opacity: 1 }], { duration: 620, delay: T });
     });
-    A(ctx.team, [{ opacity: .38 }, { opacity: 1 }], { duration: 700, delay: T });
-    T += 820;
+    A(ctx.team, [{ opacity: .42 }, { opacity: 1 }], { duration: 620, delay: T });
+    T += 620;
 
     setTimeout(done, T + 120);
     return anims;
   }
-  function tcxy() { return 'center'; }
 
   /* ---------- wiring ---------- */
   function init() {
@@ -246,6 +281,7 @@
       live = [];
       ctx.svg.style.opacity = '';
       ctx.scene.style.transform = '';
+      ctx.callout.style.opacity = 0;
       if (comps && heads.length) comps.classList.add('canim-pending');
     }
     function play() {

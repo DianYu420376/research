@@ -155,7 +155,6 @@ ${THEMES.map((th, ti) => `
     ${FUTURE.components.map((c, i) => `
       <button class="comphead" data-comp="${i}" aria-expanded="false">
         ${i ? '<span class="seam"><i></i></span>' : ''}
-        <span class="compn">${String(i + 1).padStart(2, '0')}</span>
         <span class="compt"${D(c.nameSrc)}>${c.name}</span>
         <span class="compsum"${D(c.summarySrc)}>${c.summary}</span>
         <span class="compgo">more &#8595;</span>
@@ -397,6 +396,7 @@ document.querySelectorAll('.comphead').forEach(h => {
       heads.forEach(x => { x.classList.remove('on'); x.setAttribute('aria-expanded', 'false');
         x.querySelector('.compgo').innerHTML = 'more &#8595;'; });
       compPanel.classList.remove('on');
+      delete compPanel.dataset.comp;
       setCompHeight(false);
       return;
     }
@@ -408,6 +408,7 @@ document.querySelectorAll('.comphead').forEach(h => {
     });
     renderComp(i);
     compPanel.classList.add('on');
+    compPanel.dataset.comp = i;          // so the panel can take the box's colour
     compPanel.style.height = 'auto';            // measure, then animate from it
     const target = compPanelIn.offsetHeight;
     compPanel.style.height = target + 'px';
