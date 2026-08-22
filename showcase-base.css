@@ -342,6 +342,15 @@ h1.big{
 .canim-agentlab{font-family:var(--font-ui);font-weight:700;font-size:20px;}
 .canim-hl{font-family:var(--font-ui);font-weight:700;font-size:15px;
   letter-spacing:.02em;}
+/* the robot and name in flight from the examined piece to the box header */
+.canim-flyer{position:fixed;left:0;top:0;z-index:50;opacity:0;pointer-events:none;
+  display:flex;align-items:center;gap:9px;color:#1b2a63;
+  font-family:var(--font-ui);font-weight:700;font-size:1.32rem;letter-spacing:-.01em;
+  line-height:1;will-change:transform,opacity;}
+.canim-flyer svg{display:block;}
+/* held back until the flight lands */
+.comps.canim-pending .compagent{opacity:0;}
+
 .canim-replay{position:absolute;right:6px;bottom:-4px;background:none;border:0;
   font-family:var(--font-ui);font-size:.72rem;letter-spacing:.06em;
   color:var(--ink3);cursor:pointer;padding:4px 6px;}

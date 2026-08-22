@@ -154,17 +154,17 @@
     el('feDropShadow', { dx: 1.5, dy: 4.5, stdDeviation: 3.8,
       'flood-color': '#16224a', 'flood-opacity': 0.34 }, sh);
 
-    /* The figure's pieces are not flat: a faint jigsaw grid is embossed across
-       each one. A pattern of small piece outlines reproduces it, light on the
-       top edge and dark on the bottom so it reads as relief. */
-    var TL = 21;      // finer than the piece: an emboss, not a grid
-    var pat = el('pattern', { id: 'canimTex', width: TL, height: TL,
+    /* The texture is not reconstructed, it is the figure's own pixels: a
+       48x48 patch with zero robot/outline contamination, lifted from the
+       image, turned into a colour-neutral light/dark overlay and mirror-tiled
+       so the repeat is seamless. 48px covers 0.298 of a piece there, so the
+       96px tile is 0.596 of a piece here. */
+    var TILE = 0.596 * S;
+    var pat = el('pattern', { id: 'canimTex', width: TILE, height: TILE,
       patternUnits: 'userSpaceOnUse' }, defs);
-    var mini = piecePath(TL, [1, -1, -1, 1]);
-    el('path', { d: mini, fill: 'none', stroke: '#fff', 'stroke-opacity': .22,
-      'stroke-width': 1.15, transform: 'translate(0,-0.75)' }, pat);
-    el('path', { d: mini, fill: 'none', stroke: '#0b1230', 'stroke-opacity': .075,
-      'stroke-width': 1 }, pat);
+    el('image', { href: 'figs/key_figs/piece-texture.png',
+      'xlink:href': 'figs/key_figs/piece-texture.png',
+      width: TILE, height: TILE, preserveAspectRatio: 'none' }, pat);
 
     var sheen = el('linearGradient', { id: 'canimSheen', x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
     el('stop', { offset: 0, 'stop-color': '#fff', 'stop-opacity': .30 }, sheen);
@@ -331,15 +331,35 @@
     reveal(heads[0], T);                    // Incoming interface
     T += 520 + 360;
 
-    // 6. the examined agent has done its job: it fades, the stage crops to the
-    //    puzzle, and the three boxes rise into the space it leaves. The robot
-    //    and the name carry on inside the middle box.
+    // 6. the examined agent hands itself over: its robot and name fly into the
+    //    middle box's header, which is held back until they land. The rest of
+    //    the callout fades, the stage crops, and the boxes rise into the space.
+    var header = heads[1] && heads[1].querySelector('.compagent');
+    if (header && ctx.flyer) {
+      var from = ctx.clone.getBoundingClientRect();
+      var to = header.getBoundingClientRect();
+      var fly = ctx.flyer;
+      fly.style.opacity = 1;
+      fly.style.left = (from.left + from.width / 2) + 'px';
+      fly.style.top = (from.top + from.height / 2) + 'px';
+      var dx = (to.left + to.width / 2) - (from.left + from.width / 2);
+      var dy = (to.top + to.height / 2) - (from.top + from.height / 2);
+      A(fly, [{ transform: 'translate(-50%,-50%) scale(1.25)', opacity: 0 },
+              { transform: 'translate(-50%,-50%) scale(1.25)', opacity: 1, offset: .18 },
+              { transform: 'translate(calc(-50% + ' + dx + 'px),calc(-50% + ' +
+                  dy + 'px)) scale(1)', opacity: 1, offset: .86 },
+              { transform: 'translate(calc(-50% + ' + dx + 'px),calc(-50% + ' +
+                  dy + 'px)) scale(1)', opacity: 0 }],
+        { duration: 1000, delay: T, fill: 'forwards' });
+      A(header, [{ opacity: 0 }, { opacity: 0, offset: .8 }, { opacity: 1 }],
+        { duration: 1000, delay: T, fill: 'forwards' });
+    }
     A(ctx.callout, [{ opacity: 1 }, { opacity: 0 }],
-      { duration: 520, delay: T, fill: 'forwards' });
+      { duration: 520, delay: T + 260, fill: 'forwards' });
     A(ctx.stage, [{ paddingBottom: (VH / VW * 100).toFixed(2) + '%' },
                   { paddingBottom: (CROP / VW * 100).toFixed(2) + '%' }],
       { duration: 760, delay: T + 160, fill: 'forwards' });
-    T += 760 + 200;
+    T += 1000 + 200;
 
     // 7. the team comes back to full strength; everything stays on screen.
     //    fill 'forwards', not 'both': with 'both' this step's first keyframe
@@ -380,6 +400,22 @@
     var ctx = build(stage);
     ctx.stage = stage;
 
+    /* the thing that travels: a copy of the robot mark and the name, positioned
+       over the page so it can fly from the SVG into the box's header */
+    var flyer = document.createElement('div');
+    flyer.className = 'canim-flyer';
+    flyer.setAttribute('aria-hidden', 'true');
+    flyer.innerHTML =
+      '<svg width="23" height="23" viewBox="0 0 24 24" fill="none" ' +
+      'stroke="currentColor" stroke-width="1.9" stroke-linecap="round">' +
+      '<path d="M12 3v2.4"/><circle cx="12" cy="2.2" r="1.2" fill="currentColor" ' +
+      'stroke="none"/><rect x="4.2" y="5.6" width="15.6" height="12.4" rx="3.4"/>' +
+      '<circle cx="9.2" cy="11.2" r="1.25" fill="currentColor" stroke="none"/>' +
+      '<circle cx="14.8" cy="11.2" r="1.25" fill="currentColor" stroke="none"/>' +
+      '<path d="M9.4 14.4q2.6 2 5.2 0"/></svg><span>Agent A</span>';
+    document.body.appendChild(flyer);
+    ctx.flyer = flyer;
+
     var replay = document.createElement('button');
     replay.className = 'canim-replay';
     replay.type = 'button';
@@ -400,6 +436,9 @@
       live = [];
       ctx.callout.style.opacity = 0;
       ctx.stage.style.paddingBottom = (VH / VW * 100).toFixed(2) + '%';
+      if (ctx.flyer) ctx.flyer.style.opacity = 0;
+      var hd = heads[1] && heads[1].querySelector('.compagent');
+      if (hd) hd.style.opacity = 0;
       if (comps && heads.length === 3) comps.classList.add('canim-pending');
     }
     function play() {
@@ -426,6 +465,10 @@
         var io2 = new IntersectionObserver(function (es) {
           es.forEach(function (e) {
             if (!e.isIntersecting) return;
+            // If the timeline is already running it will reveal them in
+            // sequence; jumping in here skipped the animation entirely, since
+            // the boxes now sit close enough to intersect at the same moment.
+            if (seen) { io2.disconnect(); return; }
             comps.classList.remove('canim-pending');
             heads.forEach(function (h) {
               h.getAnimations().forEach(function (a) { a.finish(); });
