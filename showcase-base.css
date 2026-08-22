@@ -248,27 +248,35 @@ h1.big{
   --c1:#7c5cc4;--c2:#2f6fd0;--c3:#d97a12;}
 /* rounded panels with a coloured rule and title, as in the figure */
 .comphead{position:relative;display:block;text-align:left;font:inherit;color:inherit;
-  background:var(--card);border:1.5px solid var(--bc,var(--band-rule));
-  border-radius:12px;margin-left:-1px;padding:15px 17px;cursor:pointer;
-  transition:background .18s,box-shadow .18s;}
-/* tinted panels, as in the figure: coloured rule, coloured title, faint wash */
-.comphead:nth-child(1){--bc:var(--c1);--bg:#f7f3fd;}
-.comphead:nth-child(2){--bc:var(--c2);--bg:#eff5fe;}
-.comphead:nth-child(3){--bc:var(--c3);--bg:#fef6ec;}
+  background:var(--card);border:2px solid var(--bc,var(--band-rule));
+  border-radius:16px;margin-left:-2px;padding:17px 19px;cursor:pointer;
+  transition:box-shadow .18s,transform .18s;}
+/* Panels as the figure draws them: 2px accent rule, a saturated tint sampled
+   from the image, bold sans titles in the accent colour, and a soft lift. */
+.comphead:nth-child(1){--bc:var(--c1);--bg:#f0ecf3;}
+.comphead:nth-child(2){--bc:var(--c2);--bg:#e6ecf6;}
+.comphead:nth-child(3){--bc:var(--c3);--bg:#fbf0e5;}
 .comphead .compt{color:var(--bc);}
-.comphead{background:var(--bg,var(--card));}
-.comphead:first-child{margin-left:0;}
-.comphead:hover{filter:brightness(.985);}
-.comphead.on{box-shadow:0 0 0 2px var(--bc);z-index:2;}
-/* held back until the animation reveals them; without JS they are simply here */
-.comps.canim-pending .comphead{opacity:0;}
-.compt{font-family:var(--font-display);font-size:1.08rem;
-  display:block;margin:0 0 6px;line-height:1.25;}
-.compbot{display:inline-block;vertical-align:-2px;margin-right:7px;}
+.comphead{background:var(--bg,var(--card));
+  box-shadow:0 3px 12px rgba(27,42,99,.07);}
+
+/* the middle panel is agent A's own, headed the way the figure heads it */
+.compagent{display:flex;align-items:center;gap:9px;
+  font-family:var(--font-ui);font-weight:700;font-size:1.32rem;
+  color:#1b2a63;letter-spacing:-.01em;line-height:1;
+  padding-bottom:11px;margin-bottom:11px;
+  border-bottom:1px solid rgba(27,42,99,.28);}
+.compbot{display:inline-flex;color:#1b2a63;}
 .compbot svg{display:block;}
-.compsum{font-size:.9rem;color:var(--ink2);display:block;line-height:1.5;}
-.compgo{font-family:var(--font-ui);font-size:.72rem;letter-spacing:.06em;
-  color:var(--ink3);display:block;margin-top:10px;}
+
+/* the three type levels inside a panel, as the figure sets them:
+   bold sans title in the accent colour, body-serif summary, small caps prompt */
+.compt{font-family:var(--font-ui);font-weight:700;font-size:1.06rem;
+  letter-spacing:-.005em;display:block;margin:0 0 7px;line-height:1.3;}
+.compsum{font-family:var(--font-body);font-size:.93rem;color:#3d4557;
+  display:block;line-height:1.55;}
+.compgo{font-family:var(--font-ui);font-size:.7rem;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink3);display:block;margin-top:13px;}
 .comphead:hover .compgo,.comphead.on .compgo{color:var(--bc);}
 
 /* the seam: a broken rule with a tab bulging into the next box */
@@ -278,7 +286,7 @@ h1.big{
 .seam::before{top:0;height:calc(50% - 13px);}
 .seam::after{bottom:0;height:calc(50% - 13px);}
 .seam i{position:absolute;left:0;top:calc(50% - 11px);width:22px;height:22px;
-  border:1.5px solid var(--band-rule);border-left-color:transparent;
+  border:2px solid var(--bc,var(--band-rule));border-left-color:transparent;
   border-radius:50%;background:var(--bg,var(--card));}
 .comphead.on .seam i,.comphead.on + .comphead .seam i{background:var(--panel);}
 
