@@ -29,6 +29,17 @@
   // finished puzzle rather than across a gap
   var CROP = GY + 2 * S + 0.12 * S + 12;
   var SPEED = 1.5;              // whole timeline runs this much faster
+  /* The scene only occupies x 279..711 of the 990-wide canvas. A phone crops
+     the canvas to that band instead of shrinking the whole thing, which shows
+     the same animation about 2.15x larger -- the difference between legible
+     and decorative. */
+  var MVBX = 265, MVBW = 460, MOBILE = 760;
+  function vbW() { return window.innerWidth < MOBILE ? MVBW : VW; }
+  function viewBox() {
+    return window.innerWidth < MOBILE
+      ? MVBX + ' 0 ' + MVBW + ' ' + VH : '0 0 ' + VW + ' ' + VH;
+  }
+  function padFor(h) { return (h / vbW() * 100).toFixed(2) + '%'; }
   var NS = 'http://www.w3.org/2000/svg';
 
   /* ---------- puzzle geometry ----------
@@ -137,7 +148,7 @@
   ];
 
   function build(host) {
-    var svg = el('svg', { viewBox: '0 0 ' + VW + ' ' + VH, class: 'canim-svg',
+    var svg = el('svg', { viewBox: viewBox(), class: 'canim-svg',
       // 'slice', not 'meet': when the stage crops at the end, meet would
       // rescale the whole scene to fit the shorter box and the puzzle would
       // shrink. slice keeps the width and clips the vacated bottom.
@@ -336,8 +347,7 @@
     //    puzzle, and the three boxes rise into the space it leaves.
     A(ctx.callout, [{ opacity: 1 }, { opacity: 0 }],
       { duration: 520, delay: T, fill: 'forwards' });
-    A(ctx.stage, [{ paddingBottom: (VH / VW * 100).toFixed(2) + '%' },
-                  { paddingBottom: (CROP / VW * 100).toFixed(2) + '%' }],
+    A(ctx.stage, [{ paddingBottom: padFor(VH) }, { paddingBottom: padFor(CROP) }],
       { duration: 760, delay: T + 160, fill: 'forwards' });
     T += 760 + 200;
 
@@ -367,15 +377,12 @@
     if (!document.body.animate) return;
     if (window.matchMedia &&
         window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    // narrow screens keep the PNG: bail out before hiding it, or the figure
-    // would vanish entirely
-    if (window.innerWidth < 700) return;
 
     var wrap = document.createElement('div');
     wrap.className = 'canim';
     var stage = document.createElement('div');
     stage.className = 'canim-stage';
-    stage.style.paddingBottom = (VH / VW * 100).toFixed(2) + '%';
+    stage.style.paddingBottom = padFor(VH);
     wrap.appendChild(stage);
     var ctx = build(stage);
     ctx.stage = stage;
@@ -399,13 +406,16 @@
       live.forEach(function (a) { a.cancel(); });
       live = [];
       ctx.callout.style.opacity = 0;
-      ctx.stage.style.paddingBottom = (VH / VW * 100).toFixed(2) + '%';
+      ctx.stage.style.paddingBottom = padFor(VH);
       if (comps && heads.length === 3) comps.classList.add('canim-pending');
     }
     function play() {
       reset();
       replay.hidden = true;
-      live = run(ctx, heads, comps, function () { replay.hidden = false; });
+      finished = false;
+      live = run(ctx, heads, comps, function () {
+        replay.hidden = false; finished = true;
+      });
     }
     replay.addEventListener('click', play);
 
@@ -443,6 +453,11 @@
       play();
       if (comps) comps.classList.remove('canim-pending');
     }
+    var finished = false;
+    addEventListener('resize', function () {
+      ctx.svg.setAttribute('viewBox', viewBox());
+      ctx.stage.style.paddingBottom = padFor(finished ? CROP : VH);
+    });
     window.__canim = { play: play, ctx: ctx };
   }
 

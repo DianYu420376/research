@@ -394,6 +394,20 @@ function renderComp(i) {
          <ul>${c.questions.map(q => `<li${D(q)}>${T(q)}</li>`).join('')}</ul></div>` : ''}
      </div>`;
 }
+/* Stacked on a phone, the three boxes are one column but the panel still sat
+   after all of them -- so opening the first box unfolded its detail underneath
+   the third. Put the panel directly after whichever box was clicked; side by
+   side it belongs below the whole row, as before. */
+const compsRow = document.querySelector('#future .comps');
+function stacked() {
+  return compsRow &&
+    getComputedStyle(compsRow).gridTemplateColumns.split(' ').length < 2;
+}
+function placePanel(head) {
+  if (!compPanel || !compsRow) return;
+  const want = stacked() ? head : compsRow;
+  if (want.nextElementSibling !== compPanel) want.after(compPanel);
+}
 function setCompHeight(open) {
   compPanel.style.height = open ? compPanelIn.offsetHeight + 'px' : '0px';
 }
@@ -417,12 +431,16 @@ document.querySelectorAll('.comphead').forEach(h => {
       x.querySelector('.compgo').innerHTML = k === i ? 'less &#8593;' : 'more &#8595;';
     });
     renderComp(i);
+    placePanel(h);
     compPanel.classList.add('on');
     compPanel.dataset.comp = i;          // so the panel can take the box's colour
     compPanel.style.height = 'auto';            // measure, then animate from it
     const target = compPanelIn.offsetHeight;
     compPanel.style.height = target + 'px';
   });
+});
+addEventListener('resize', () => {
+  if (compOpen != null) placePanel(document.querySelectorAll('#future .comphead')[compOpen]);
 });
 if (compPanel) {
   compPanel.addEventListener('transitionend', ev => {
