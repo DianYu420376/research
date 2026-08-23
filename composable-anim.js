@@ -28,6 +28,7 @@
   // crop to just below the bottom knobs, so the boxes end up tight under the
   // finished puzzle rather than across a gap
   var CROP = GY + 2 * S + 0.12 * S + 12;
+  var SPEED = 1.5;              // whole timeline runs this much faster
   var NS = 'http://www.w3.org/2000/svg';
 
   /* ---------- puzzle geometry ----------
@@ -234,9 +235,14 @@
   /* ---------- timeline ---------- */
   function run(ctx, heads, comps, done) {
     var anims = [];
+    /* Every delay and duration below is written at 1x and divided here, so the
+       timeline can be retimed from one constant without re-tuning each step. */
     function A(node, frames, opts) {
-      var a = node.animate(frames, Object.assign(
-        { fill: 'both', easing: 'cubic-bezier(.22,.61,.36,1)' }, opts));
+      var o = Object.assign(
+        { fill: 'both', easing: 'cubic-bezier(.22,.61,.36,1)' }, opts);
+      if (o.duration) o.duration /= SPEED;
+      if (o.delay) o.delay /= SPEED;
+      var a = node.animate(frames, o);
       anims.push(a);
       return a;
     }
@@ -276,9 +282,9 @@
     });
     T += 860 + 4 * 85;
     A(ctx.team, [{ opacity: 0 }, { opacity: 1 }], { duration: 440, delay: T });
-    // hold on the finished puzzle: the examined agent used to arrive on top of
-    // the assembly, before there was anything to have assembled
-    T += 440 + 900;
+    // a short beat on the finished puzzle -- long enough to register that it
+    // is complete, not long enough to feel like waiting
+    T += 440 + 260;
 
     // 3. a copy of A travels down and becomes the middle box
     ctx.callout.style.opacity = 1;
@@ -348,7 +354,7 @@
       { duration: 600, delay: T, fill: 'forwards' });
     T += 600;
 
-    setTimeout(done, T + 150);
+    setTimeout(done, (T + 150) / SPEED);
     return anims;
   }
 
