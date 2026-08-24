@@ -259,9 +259,15 @@ h1.big{
    by about four levels. A gentle gradient plus a one-pixel inner highlight on
    the top edge gives the same slightly-raised card, without inventing noise
    the original does not have. */
-.comphead:nth-child(1){--bc:var(--c1);--bg:#f0ecf3;--bg2:#f7f4fa;}
-.comphead:nth-child(2){--bc:var(--c2);--bg:#e6ecf6;--bg2:#f0f5fc;}
-.comphead:nth-child(3){--bc:var(--c3);--bg:#fbf0e5;--bg2:#fef8f1;}
+/* Keyed off data-comp, not :nth-child. Stacked on a phone the detail panel is
+   moved into this row, directly after the box that was clicked -- which shifts
+   every later box's child index, so box 2 took box 3's colour and box 3 matched
+   no rule at all and went white. The index is a property of the component, not
+   of where it currently sits in the DOM. */
+.comphead[data-comp="0"]{--bc:var(--c1);--bg:#f0ecf3;--bg2:#f7f4fa;}
+.comphead[data-comp="0"]{margin-left:0;}   /* no overlap on the first box */
+.comphead[data-comp="1"]{--bc:var(--c2);--bg:#e6ecf6;--bg2:#f0f5fc;}
+.comphead[data-comp="2"]{--bc:var(--c3);--bg:#fbf0e5;--bg2:#fef8f1;}
 .comphead .compt{color:var(--bc);}
 /* the panels stay a clean tint: the figure's own panels carry no grain, and
    borrowing the pieces' texture made them busy */
